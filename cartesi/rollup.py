@@ -62,7 +62,6 @@ class HTTPRollupServer(Rollup):
 
             rollup_response = response.json()
             # TODO: Error handling for this model creation
-            print(rollup_response)
             rollup_response = RollupResponse.model_validate(rollup_response)
 
             # Rollup 0.8 behavior

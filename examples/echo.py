@@ -1,6 +1,6 @@
 import logging
 
-from cartesi import DApp, Rollup, RollupData  # , notice, report, Input
+from cartesi import DApp, Rollup, RollupData
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -29,7 +29,4 @@ def handle_inspect(rollup: Rollup, data: RollupData) -> bool:
 
 
 if __name__ == '__main__':
-    print()
-    print(dapp.advance_handler)
-    print()
     dapp.run()
