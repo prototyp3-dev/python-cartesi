@@ -26,14 +26,17 @@ class RollupMetadata(BaseModel):
 
 
 class RollupData(BaseModel):
-    metadata: RollupMetadata
+    metadata: RollupMetadata | None = None
     payload: str
 
-    def decoded_payload(self) -> bytes:
-        return _str2hex(self.payload)
+    def bytes_payload(self) -> bytes:
+        return bytes.fromhex(self.payload[2:])
+
+    def str_payload(self, encoding='utf-8') -> str:
+        return bytes.fromhex(self.payload[2:]).decode(encoding)
 
     def json_payload(self) -> bytes:
-        return json.loads(_str2hex(self.payload).decode('utf-8'))
+        return json.loads(self.str_payload())
 
 
 class RollupResponse(BaseModel):
