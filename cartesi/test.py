@@ -40,7 +40,7 @@ class MockRollup(Rollup):
                 'payload': payload,
             }
         }
-        self.notices.append(data)
+        self.reports.append(data)
 
     def send_advance(self, hex_payload: str):
 
