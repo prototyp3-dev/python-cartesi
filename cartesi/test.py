@@ -70,6 +70,27 @@ class MockRollup(Rollup):
         if status:
             self.input += 1
 
+    def send_inspect(self, hex_payload: str):
+
+        self.block += 1
+
+        data = {
+            'request_type': 'inspect',
+            'data': {
+                'payload': hex_payload,
+            }
+        }
+        rollup_response = RollupResponse.model_validate(data)
+        handler = self.handler
+        if handler is not None:
+            status = handler(rollup_response)
+        else:
+            LOGGER.error("No handler found for message.")
+            status = False
+        self.status = status
+        if status:
+            self.input += 1
+
 
 class TestClient:
 
@@ -81,3 +102,6 @@ class TestClient:
 
     def send_advance(self, *args, **kwargs):
         self.rollup.send_advance(*args, **kwargs)
+
+    def send_inspect(self, *args, **kwargs):
+        self.rollup.send_inspect(*args, **kwargs)
