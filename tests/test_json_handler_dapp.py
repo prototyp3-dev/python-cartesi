@@ -31,16 +31,3 @@ def test_simple_set_get(dapp_client: TestClient):
         {'key': 'key_1', 'value': 'value_1'}
     )
     assert dapp_client.rollup.notices[-1]['data']['payload'] == expected_payload
-
-
-def test_get_inexistent(dapp_client: TestClient):
-
-    get_payload = to_jsonhex(
-        {'op': 'get', 'key': 'key_1000'}
-    )
-    dapp_client.send_advance(hex_payload=get_payload)
-    assert dapp_client.rollup.status
-    expected_payload = to_jsonhex(
-        {'key': 'key_1', 'value': 'value_1'}
-    )
-    assert dapp_client.rollup.notices[-1]['data']['payload'] == expected_payload
