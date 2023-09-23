@@ -13,8 +13,8 @@ class DApp:
 
     def __init__(self):
         self.routers: list[Router] = []
-        self.default_advance_handler = lambda x: False
-        self.default_inspect_handler = lambda x: False
+        self.default_advance_handler = lambda rollup, data: False
+        self.default_inspect_handler = lambda rollup, data: False
         self.rollup: Rollup | None = None
 
     def advance(self):
