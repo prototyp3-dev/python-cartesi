@@ -62,7 +62,7 @@ class HTTPRollupServer(Rollup):
 
             rollup_response = response.json()
             # TODO: Error handling for this model creation
-            rollup_response = RollupResponse.model_validate(rollup_response)
+            rollup_response = RollupResponse.parse_obj(rollup_response)
 
             # Rollup 0.8 behavior
             is_first_message = (

@@ -59,7 +59,7 @@ class MockRollup(Rollup):
                 'payload': hex_payload,
             }
         }
-        rollup_response = RollupResponse.model_validate(data)
+        rollup_response = RollupResponse.parse_obj(data)
         handler = self.handler
         if handler is not None:
             status = handler(rollup_response)
@@ -80,7 +80,7 @@ class MockRollup(Rollup):
                 'payload': hex_payload,
             }
         }
-        rollup_response = RollupResponse.model_validate(data)
+        rollup_response = RollupResponse.parse_obj(data)
         handler = self.handler
         if handler is not None:
             status = handler(rollup_response)
