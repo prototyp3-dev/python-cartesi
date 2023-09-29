@@ -1,10 +1,13 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 import re
+import logging
 
 from pydantic import BaseModel
 
 from .models import RollupResponse
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Router(ABC):
@@ -125,7 +128,7 @@ class URLRouter(Router):
             operation = URLOperation(
                 path=path,
                 path_regex=re.compile(f'^{path}$'),
-                requestType='inspect',
+                requestType='inspect_state',
                 handler=func,
                 operationId=operationId if operationId else func.__name__,
                 namespace=namespace,
@@ -139,13 +142,9 @@ class URLRouter(Router):
     def get_handler(self, request: RollupResponse):
         """Return first matching route for the given request"""
         try:
-            print("Aqui")
             req_path = request.data.str_payload()
-            print(req_path)
+            LOGGER.debug("Looking for URL routes matching '%s'.", req_path)
         except Exception:
-            return None
-
-        if not req_path.startswith('/'):
             return None
 
         for route in self.routes:
@@ -155,6 +154,7 @@ class URLRouter(Router):
             match, params = _match_url(route.path_regex, req_path)
             if not match:
                 continue
+            LOGGER.info("Path '%s' matched route '%s'", req_path, repr(route))
 
             # TODO: Return a Partial with the parameters already applied to the
             # handler
