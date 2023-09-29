@@ -13,6 +13,7 @@ class MockRollup(Rollup):
         super().__init__()
         self.notices = []
         self.reports = []
+        self.vouchers = []
         self.epoch = 0
         self.input = 0
         self.block = 0
@@ -41,6 +42,16 @@ class MockRollup(Rollup):
             }
         }
         self.reports.append(data)
+
+    def voucher(self, payload: str):
+        data = {
+            'epoch_index': self.epoch,
+            'input_index': self.input,
+            'data': {
+                'payload': payload,
+            }
+        }
+        self.vouchers.append(data)
 
     def send_advance(self, hex_payload: str):
 
