@@ -1,6 +1,6 @@
 import pytest
 
-from cartesi.test import TestClient
+from cartesi.testclient import TestClient
 
 import examples.url_router
 

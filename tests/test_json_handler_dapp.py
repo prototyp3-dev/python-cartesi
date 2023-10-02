@@ -1,6 +1,6 @@
 import pytest
 
-from cartesi.test import TestClient
+from cartesi.testclient import TestClient
 
 import examples.json_handler
 from examples.json_handler import to_jsonhex
