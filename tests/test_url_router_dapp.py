@@ -18,7 +18,7 @@ def dapp_client() -> TestClient:
 
 def test_hello_world_advance(dapp_client: TestClient):
 
-    payload = str2hex('/hello/')
+    payload = str2hex('hello/')
     dapp_client.send_advance(hex_payload=payload)
 
     assert dapp_client.rollup.status
@@ -30,7 +30,7 @@ def test_hello_world_advance(dapp_client: TestClient):
 
 def test_hello_world_inspect(dapp_client: TestClient):
 
-    payload = str2hex('/hello/')
+    payload = str2hex('hello/')
     dapp_client.send_inspect(hex_payload=payload)
 
     assert dapp_client.rollup.status

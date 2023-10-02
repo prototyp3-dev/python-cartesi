@@ -86,7 +86,7 @@ class MockRollup(Rollup):
         self.block += 1
 
         data = {
-            'request_type': 'inspect',
+            'request_type': 'inspect_state',
             'data': {
                 'payload': hex_payload,
             }

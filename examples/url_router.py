@@ -14,13 +14,13 @@ def str2hex(str):
     return "0x" + str.encode("utf-8").hex()
 
 
-@url_router.advance('/hello/')
+@url_router.advance('hello/')
 def hello_world_advance(rollup: Rollup, data: RollupData) -> bool:
     rollup.notice(str2hex('Hello World'))
     return True
 
 
-@url_router.inspect('/hello/')
+@url_router.inspect('hello/')
 def hello_world_inspect(rollup: Rollup, data: RollupData) -> bool:
     rollup.report(str2hex('Hello World'))
     return True
