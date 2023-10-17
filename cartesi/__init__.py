@@ -3,4 +3,4 @@
 from .dapp import DApp # noqa
 from .models import RollupData, RollupMetadata, RollupResponse # noqa
 from .rollup import Rollup, HTTPRollupServer # noqa
-from .router import Router, JSONRouter, URLRouter # noqa
+from .router import Router, JSONRouter, URLRouter, URLParameters # noqa

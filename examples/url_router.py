@@ -1,6 +1,6 @@
 import logging
 
-from cartesi import DApp, Rollup, RollupData, URLRouter
+from cartesi import DApp, Rollup, RollupData, URLRouter, URLParameters
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -23,6 +23,16 @@ def hello_world_advance(rollup: Rollup, data: RollupData) -> bool:
 @url_router.inspect('hello/')
 def hello_world_inspect(rollup: Rollup, data: RollupData) -> bool:
     rollup.report(str2hex('Hello World'))
+    return True
+
+
+@url_router.inspect('hello/{name}')
+def hello_world_inspect_parms(rollup: Rollup, params: URLParameters) -> bool:
+    msg = f'Hello {params.path_params["name"]}'
+    if 'suffix' in params.query_params:
+        msg += params.query_params["suffix"][0]
+
+    rollup.report(str2hex(msg))
     return True
 
 

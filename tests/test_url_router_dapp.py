@@ -38,3 +38,28 @@ def test_hello_world_inspect(dapp_client: TestClient):
 
     response = str2hex('Hello World')
     assert dapp_client.rollup.reports[-1]['data']['payload'] == response
+
+
+def test_hello_world_inspect_parms_1(dapp_client: TestClient):
+
+    payload = str2hex('hello/Earth')
+    dapp_client.send_inspect(hex_payload=payload)
+
+    assert dapp_client.rollup.status
+    assert len(dapp_client.rollup.reports) > 0
+
+    response = str2hex('Hello Earth')
+    assert dapp_client.rollup.reports[-1]['data']['payload'] == response
+
+
+def test_hello_world_inspect_parms_2(dapp_client: TestClient):
+
+    payload = str2hex('hello/Earth?suffix=%21')
+    dapp_client.send_inspect(hex_payload=payload)
+
+    assert dapp_client.rollup.status
+    assert len(dapp_client.rollup.reports) > 0
+
+    response = str2hex('Hello Earth!')
+    print(dapp_client.rollup.reports[-1]['data']['payload'])
+    assert dapp_client.rollup.reports[-1]['data']['payload'] == response
