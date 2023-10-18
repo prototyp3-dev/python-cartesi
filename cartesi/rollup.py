@@ -64,17 +64,6 @@ class HTTPRollupServer(Rollup):
             # TODO: Error handling for this model creation
             rollup_response = RollupResponse.parse_obj(rollup_response)
 
-            # Rollup 0.8 behavior
-            is_first_message = (
-                rollup_response.data.metadata is not None and
-                rollup_response.data.metadata.epoch_index == 0 and
-                rollup_response.data.metadata.input_index == 0
-            )
-            if is_first_message:
-                self.rollup_address = rollup_response.data.metadata.msg_sender
-                LOGGER.info(f"Captured rollup address: {self.rollup_address}")
-                continue
-
             handler = self.handler
             if handler is not None:
                 status = handler(rollup_response)
