@@ -53,7 +53,12 @@ class MockRollup(Rollup):
         }
         self.vouchers.append(data)
 
-    def send_advance(self, hex_payload: str):
+    def send_advance(
+            self,
+            hex_payload: str,
+            msg_sender: str = '0xdeadbeef7dc51b33c9a3e4a21ae053daa1872810',
+            timestamp: int = 0,
+        ):
 
         self.block += 1
 
@@ -61,11 +66,11 @@ class MockRollup(Rollup):
             'request_type': 'advance_state',
             'data': {
                 'metadata': {
-                    'msg_sender': '0xdeadbeef',
+                    'msg_sender': msg_sender,
                     'epoch_index': self.epoch,
                     'input_index': self.input,
                     'block_number': self.block,
-                    'timestamp': 0,
+                    'timestamp': timestamp,
                 },
                 'payload': hex_payload,
             }
@@ -104,6 +109,7 @@ class MockRollup(Rollup):
 
 
 class TestClient:
+    __test__ = False
 
     def __init__(self, app):
         self.app = app
