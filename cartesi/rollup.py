@@ -91,3 +91,10 @@ class HTTPRollupServer(Rollup):
         LOGGER.info(f"Received report status {response.status_code} "
                     f"body {response.content}")
         return response.content
+
+    def voucher(self, payload: dict):
+        LOGGER.info("Adding voucher")
+        response = requests.post(self.address + '/voucher', json=payload)
+        LOGGER.info(f"Received report status {response.status_code} "
+                    f"body {response.content}")
+        return response.content
