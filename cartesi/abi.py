@@ -8,9 +8,10 @@ import eth_abi
 import eth_abi.packed
 import pydantic
 
+from . import _eth_abi_packed
+
+
 # Type Aliases for ABI encoding
-
-
 @dataclass
 class ABIType:
     name: str
@@ -133,7 +134,7 @@ def encode_model(obj: pydantic.BaseModel, packed: bool = False) -> bytes:
 M = TypeVar('M', bound=pydantic.BaseModel)
 
 
-def decode_to_model(data: bytes, model: M) -> M:
+def decode_to_model(data: bytes, model: M, packed: bool = False) -> M:
     """Unserialize ABI Encoded data into model
 
     Parameters
@@ -142,13 +143,18 @@ def decode_to_model(data: bytes, model: M) -> M:
         Data to decode
     model : pydantic.BaseModel
         Pydantic model containing ABI compatible type hints
+    packed : bool
+        Whether the input is coded as a Packed ABI encoding
 
     Returns
     -------
     pydantic.BaseModel
         Object containing decoded data
     """
-    decode = eth_abi.decode
+    if packed:
+        decode = _eth_abi_packed.decode_packed
+    else:
+        decode = eth_abi.decode
 
     fields = model.__fields__.keys()
     types = get_abi_types_from_model(model)
