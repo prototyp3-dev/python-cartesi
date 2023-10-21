@@ -1,5 +1,7 @@
+import abc
 import json
 
+from Crypto.Hash import keccak
 from pydantic import BaseModel
 
 
@@ -42,3 +44,33 @@ class RollupData(BaseModel):
 class RollupResponse(BaseModel):
     request_type: str
     data: RollupData
+
+
+class ABIHeader(BaseModel, abc.ABC):
+
+    @abc.abstractmethod
+    def to_bytes(self):
+        """Get the bytes representation for this header"""
+        pass
+
+
+class ABILiteralHeader(ABIHeader):
+    header: bytes
+
+    def to_bytes(self) -> bytes:
+        return self.header
+
+
+class ABIFunctionSelectorHeader(ABIHeader):
+    """Return the firs 4 bytes of the Keccak-256 if the function signature"""
+    function: str
+    argument_types: list[str]
+
+    def to_bytes(self) -> bytes:
+        signature = f'{self.function}({",".join(self.argument_types)})'
+
+        sig_hash = keccak.new(digest_bits=256)
+        sig_hash.update(signature.encode('utf-8'))
+
+        selector = sig_hash.digest()[:4]
+        return selector
