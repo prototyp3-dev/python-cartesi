@@ -37,6 +37,7 @@ Int256 = Annotated[int, ABIType('int256')]
 Address = Annotated[str, ABIType('address')]
 
 Bytes = Annotated[bytes, ABIType('bytes')]
+Bytes4 = Annotated[bytes, ABIType('bytes4')]
 Bytes8 = Annotated[bytes, ABIType('bytes8')]
 Bytes24 = Annotated[bytes, ABIType('bytes24')]
 Bytes32 = Annotated[bytes, ABIType('bytes32')]
