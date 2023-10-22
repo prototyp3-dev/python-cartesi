@@ -48,7 +48,7 @@ class ABIRouter(Router):
                 requestType='advance_state',
                 handler=func,
                 header=header,
-                msg_sender=msg_sender.lower(),
+                msg_sender=msg_sender.lower() if msg_sender is not None else None,
                 header_bytes=header.to_bytes() if header is not None else None,
                 namespace=self.namespace,
                 summary=summary,
