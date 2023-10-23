@@ -10,6 +10,7 @@ from eth_abi.decoding import (
     AddressDecoder,
     UnsignedIntegerDecoder,
     ByteStringDecoder,
+    BytesDecoder,
 )
 
 
@@ -49,9 +50,16 @@ class PackedBytesDecoder(ByteStringDecoder):
 
 
 registry_packed.register_decoder(
-    BaseEquals("bytes"),
+    BaseEquals("bytes", with_sub=False),
     PackedBytesDecoder,
     label="bytes"
+)
+
+
+registry_packed.register_decoder(
+    BaseEquals("bytes", with_sub=True),
+    BytesDecoder,
+    label="bytes<M>"
 )
 
 default_codec_packed = ABICodec(registry_packed)
