@@ -43,13 +43,15 @@ class ABIRouter(Router):
     ):
         """Decorator for inserting handle advance"""
         def decorator(func):
+            _sender = msg_sender.lower() if msg_sender is not None else None
+            _header = header.to_bytes() if header is not None else None
             operation = ABIOperation(
                 operationId=func.__name__,
                 requestType='advance_state',
                 handler=func,
                 header=header,
-                msg_sender=msg_sender.lower() if msg_sender is not None else None,
-                header_bytes=header.to_bytes() if header is not None else None,
+                msg_sender=_sender,
+                header_bytes=_header,
                 namespace=self.namespace,
                 summary=summary,
                 description=description,
