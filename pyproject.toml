@@ -12,10 +12,17 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+    "requests >= 2.31.0",
+    "pydantic < 2",
+    "pytest ~= 7.4.0",
+    "eth-abi ~= 4.2.1",
+    "pycryptodome ~= 3.19.0",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/prototyp3-dev/python-cartesi"
 
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=69.0", "wheel"]
 build-backend = "setuptools.build_meta"
