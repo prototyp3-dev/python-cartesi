@@ -128,7 +128,86 @@ For this DApp, if the data incoming from the Cartesi input is the equivalent to 
 
 ### ABI Router
 
+The ABI Router is useful when the input resembles the Solidity ABI encoding. It offers several ways of matching with the incoming content:
+
+- **Header** (optional): Matches with the input if it starts with a predefined sequence of bytes.
+- **Sender Address** (optional): Matches with the input when the sender corresponds to a predefined address (only for advance-state requests).
+
+#### Working with headers
+
+To match with headers, you should pass an instance of a subclass of `ABIHeader` to the `header` parameter of the decorator. The framework supplies the following data classes:
+
+**`ABILiteralHeader`**
+
+Matches with a literal header supplied by the developer in the `header` attribute, as bytes. For example, the following handler matches with inputs starting with the bytes `0x01020304`:
+
+
+```python
+from cartesi import DApp, Rollup, RollupData, ABIRouter, ABILiteralHeader
+
+dapp = DApp()
+abi_router = ABIRouter()
+dapp.add_router(abi_router)
+
+@abi_router.advance(header=ABILiteralHeader(header=bytes.fromhex('01020304')))
+def handle_input_1234(rollup: Rollup, data: RollupData):
+    ...
+```
+
+**`ABIFunctionSelectorHeader`**
+
+Generates a header according to the Solidity ABI [Function Selector](https://docs.soliditylang.org/en/latest/abi-spec.html#function-selector). It expects two attributes:
+
+- `function`: The name of the function being called
+- `argument_types`: A list of strings representing the Solidity types for each parameter.
+
+With these arguments, the class will compute the four first bytes of the keccak-256 hash for the string `<function>(<argument_types>)`, and use it as a header.
+
+For example, the declaration `ABIFunctionSelectorHeader(function='withdraw', argument_types=['uint256', 'address'])` will match with a message starting with the bytes `00f714ce`, as they are the first 4 bytes of the Keccak-256 of the string `withdraw(uint256,address)`
+
+#### Creating a custom header
+
+The header classes are Pydantic models that inherit from the `ABIHeader` abstract base class. To create a custom header class, you should subclass `ABIHeader` and implement the method `to_bytes()`, as below:
+
+```python
+from Crypto.Hash import keccak
+from cartesi.models import ABIHeader
+
+class MyCustomHeader(ABIHeader):
+    descriptor: str
+
+    def to_bytes(self) -> bytes:
+        sig_hash = keccak.new(digest_bits=256)
+        sig_hash.update(self.descriptor.encode('utf-8'))
+        header = sig_hash.digest()[:4]
+        return header
+```
+
+#### Matching with message sender
+
+The `msg_sender` parameter for the advance decorator method of the `ABIRouter` will match not with the contents but with the sender of the message. For example, to match with the Cartesi's Ether Portal, you can declare a route like the code below:
+
+```python
+from cartesi import DApp, Rollup, RollupData, ABIRouter, ABILiteralHeader
+
+dapp = DApp()
+abi_router = ABIRouter()
+dapp.add_router(abi_router)
+
+ETHER_PORTAL = '0xffdbe43d4c855bf7e0f105c400a50857f53ab044'
+
+@abi_router.advance(msg_sender=ETHER_PORTAL)
+def handle_deposit(rollup: Rollup, data: RollupData):
+    ...
+```
+
+In this example, the `handle_deposit` function will be called whenever the Ether portal sends an input to the DApp.
+
+Both the `msg_sender` and `header` parameters can be set at the same time. In this case, the message must match with both criteria to trigger the execution of the handler.
+
 ### URL Router
+
+### DApp Relay Router
 
 ### The DApp default Router
 
