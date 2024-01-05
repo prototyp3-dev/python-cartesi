@@ -16,7 +16,7 @@ The main goals of the framework are:
 To install the framework you just jave to do a simple:
 
 ```shell
-pip install cartesi
+pip install python-cartesi
 ```
 
 Although this is a pure Python library, it depends on PyCryptodome, which will need to compile some source code. You are advised to either include `build-essential` in the `apt-get install` command of your DApp's Dockerfile or include the line `--find-links https://felipefg.github.io/pip-wheels-riscv/wheels/` in the beginning of your requirements.txt file in order to use a pre-built binary for RiscV.
@@ -207,7 +207,52 @@ Both the `msg_sender` and `header` parameters can be set at the same time. In th
 
 ### URL Router
 
+The URLRouter is useful when the input is part of a URL. This can happen, for example, in a GET inspect request. The input is assumed to be the *path* portion of the URL, without the leading slash, and optionally followed by the query string part.
+
+The router exposes two decorator methods: `inspect(path_template)` and `advance(path_template)`, for inspect and advance requests. Both methods receive a path template as parameter. This template can specify dynamic parts, such as path parameters, by surrounding it in curly braces. For example:
+
+- A path template `'transactions/by-date'` will match both the input `transactions/by-date` and `transactions/by-date?destination=abc123`
+- A path template `'wallet/{id}/balance'` will match `wallet/123/balance`, but not `wallet//balance`
+
+The handler can receive a third argument of the `URLParameter` type. This object will contain two attributes:
+
+- `path_params`: a dict mapping the name of a path parameter to its value. For example, when the template is `'wallet/{id}/balance'` and the input is `wallet/123/balance`, the value of `path_params` will be `{'id': '123'}`. If the template doesn't specify any dynamic part, the value of this attribute will be an empty dictionary.
+- `query_params`: a dict mapping the name of each query string parameters to a list of values. For example, if the matched input is `transactions/by-date?destination=abc123`, the value for this attribute will be `{'destination': ['abc123']}`. If no query string is passed, this attribute will be an empty dictionary.
+
+> [!IMPORTANT]
+> It is mandatory to correctly annotate the handler's parameters with type hints. The URLHandler will use this information to dynamically determine what information to send to the handler.
+
+The code fragment for the DApp below, for example, will return a report containing the string 'Hello World' when the user send an input `hello/world`. When running with sunodo, this can be achieved by sending an HTTP GET request to http://localhost:8000/inspect/hello/world.
+
+```python
+from cartesi import DApp, Rollup, URLRouter, URLParameters
+
+dapp = DApp()
+url_router = URLRouter()
+dapp.add_router(url_router)
+
+@url_router.inspect('hello/{name}')
+def hello_world_inspect_parms(rollup: Rollup, params: URLParameters) -> bool:
+    msg = f'Hello {params.path_params["name"]}'
+    rollup.report('0x' + msg.encode('utf-8').hex())
+    return True
+```
+
 ### DApp Relay Router
+
+This is a very simple router wihch will receive and accumulate the DApp's contract address, as reported by the DApp address relay contact. The router itself only exposes an attribute called `address`, that will be initialized as None and set to the address reported by the relay contract once it is received.
+
+```python
+from cartesi import DApp
+from cartesi.router import DAppAddressRouter
+
+ADDRESS_RELAY_ADDRESS = '0xf5de34d6bbc0446e2a45719e718efebaae179dae'
+
+dapp = DApp()
+
+dapp_address = DAppAddressRouter(relay_address=ADDRESS_RELAY_ADDRESS)
+dapp.add_router(dapp_address)
+```
 
 ### The DApp default Router
 
@@ -242,6 +287,6 @@ If the user passes an invalid JSON or a document that does not contain the `"op"
 
 ## Testing
 
-## Generating Vouchers
+The framework provides 
 
-## Wallets
+## Generating Vouchers
