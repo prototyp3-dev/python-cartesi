@@ -1,8 +1,8 @@
 [project]
-name = "cartesi"
+name = "python-cartesi"
 version = "0.0.1"
 authors = [
-  { name="Example Author", email="author@example.com" },
+  { name="Felipe Fink Grael", email="felipefg@prototyp3.dev" },
 ]
 description = "A Python Framework for Cartesi Distributed Applications"
 readme = "README.md"
