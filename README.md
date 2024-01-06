@@ -141,7 +141,6 @@ To match with headers, you should pass an instance of a subclass of `ABIHeader` 
 
 Matches with a literal header supplied by the developer in the `header` attribute, as bytes. For example, the following handler matches with inputs starting with the bytes `0x01020304`:
 
-
 ```python
 from cartesi import DApp, Rollup, RollupData, ABIRouter, ABILiteralHeader
 
@@ -222,7 +221,7 @@ The handler can receive a third argument of the `URLParameter` type. This object
 > [!IMPORTANT]
 > It is mandatory to correctly annotate the handler's parameters with type hints. The URLHandler will use this information to dynamically determine what information to send to the handler.
 
-The code fragment for the DApp below, for example, will return a report containing the string 'Hello World' when the user send an input `hello/world`. When running with sunodo, this can be achieved by sending an HTTP GET request to http://localhost:8000/inspect/hello/world.
+The code fragment for the DApp below, for example, will return a report containing the string 'Hello World' when the user send an input `hello/world`. When running with sunodo, this can be achieved by sending an HTTP GET request to `http://localhost:8000/inspect/hello/world`.
 
 ```python
 from cartesi import DApp, Rollup, URLRouter, URLParameters
@@ -287,6 +286,64 @@ If the user passes an invalid JSON or a document that does not contain the `"op"
 
 ## Testing
 
-The framework provides 
+Testing is an important part of the development of complex software. The framework provides a TestClient that can be used to interact a DApp inside automated tests. The constructor of the `TestClient` class expects a fully configured instance of the `DApp` class, and expose methods for sending advance and inspect requests.
+
+For example, supposing we have an `echo.py` file with an implementation of an echo DApp, we could write the following file for automated tests using pytest:
+
+```python
+from cartesi.testclient import TestClient
+import pytest
+
+import echo
+
+@pytest.fixture
+def dapp_client() -> TestClient:
+    client = TestClient(echo.dapp)
+    return client
+
+def test_simple_echo(dapp_client: TestClient):
+    hex_payload = '0x' + 'hello'.encode('utf-8').hex()
+
+    dapp_client.send_advance(hex_payload=hex_payload)
+
+    assert dapp_client.rollup.status
+    assert len(dapp_client.rollup.notices) > 0
+    assert dapp_client.rollup.notices[-1]['data']['payload'] == hex_payload
+```
+
+Although the example above was written using pytest, the TestClient makes no assumption about the testing framework, so it should work equally well using the python's builtin unittest module or other automated test frameworks.
+
+The `TestClient` exposes the following methods and attributes:
+
+**`TestClient.send_advance(self, hex_payload, msg_sender, timestamp)`**
+
+Sends an **advance state** input, such as one being received from the underlying blockchain input box. It expects the following parameters:
+
+- **`hex_payload`** (required): a hex encoded string, starting with `0x`, of the input
+- **`msg_sender`** (optional): a hex encoded string, starting with `0x` of the address for the message sender. The default value for this parameter is `0xdeadbeef7dc51b33c9a3e4a21ae053daa1872810`.
+
+**`TestClient.send_inspect(self, hex_payload)`**
+
+Sends an **inspect** input, such as one being received from the [Inspect dApp state REST API](https://docs.cartesi.io/cartesi-rollups/api/inspect/inspect/). It only expects a hex encoded string, starting with `0x`, with the inpect payload.
+
+For example, if you are running your DApp with sunodo, and want to simulate a the effects of a call to `http://localhost:8000/inspect/hello/world`, the value that should be passed in the hex_payload is `'0x68656c6c6f2f776f726c64'`, which is the hex encoded representation of `hello/world`.
+
+**`TestClient.rollup`**
+
+This is an instance of a test double implementation of the rollup server. This object will contain attributes holding all the notices, reports and vouchers emmitted by the DApp, togethe with the state of the last transaction. The individual attributes are listed below.
+
+**`TestClient.rollup.status`**
+
+The boolean status of the latest transaction as returned by the handler. A `True` value indicates that the handler has completed successfully and its computation should be accepted. A `False` value generally denotes an error or invalid input.
+
+**`TestClient.rollup.notices`, `TestClient.rollup.reports`, `TestClient.rollup.vouchers`**
+
+A list of dictionaries containing the emmited notices, reports or vouchers. Each dictionary contains the following keys:
+
+- **`epoch_index`**: The epoch index for the input that generated this emmitted output
+- **`input_index`**: The index of the input within the epoch that generated this output
+- **`data`** A dict containing the key `payload`, whose value is the payload for the corresponding output
+
+For notices and reports, the payload will be a hex encoded string, starting with `0x`, of the contents of the notice or report. Vouchers, on the other hand, should be a dictionary as expected by the Rollups server [Add new Voucher](https://docs.cartesi.io/cartesi-rollups/api/rollup/add-voucher/) API, i.e., containing a `destination` and a `payload` keys.
 
 ## Generating Vouchers
