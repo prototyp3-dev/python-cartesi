@@ -347,3 +347,86 @@ A list of dictionaries containing the emmited notices, reports or vouchers. Each
 For notices and reports, the payload will be a hex encoded string, starting with `0x`, of the contents of the notice or report. Vouchers, on the other hand, should be a dictionary as expected by the Rollups server [Add new Voucher](https://docs.cartesi.io/cartesi-rollups/api/rollup/add-voucher/) API, i.e., containing a `destination` and a `payload` keys.
 
 ## Generating Vouchers
+
+A voucher is an output that your DApp can generate to perform a transaction in the base layer blockchain. Once emitted, and finalized, the voucher can be retrieved by an external agent through the GraphQL API and then submitted to the DApp on-chain contract so that the desired transaction take place. Since it represents a full transaction, the voucher payload should be a full function call encoded according to the Solidity [Contract ABI Specification](https://docs.soliditylang.org/en/latest/abi-spec.html).
+
+This framework offers a pythonic way for representing the function calls and generating the voucher payload. The high level way of generating a voucher involves creating a [Pydantic](https://docs.pydantic.dev/1.10/) model with specially annotated type hints that will allow the encoder to understand which Solidity type should be used when encoding the values.
+
+For example, let's suppose we want to call an ERC20 transfer function, which has the following signature:
+
+```solidity
+function transfer(address to, uint256 value)
+```
+
+A Pydantic model that represents the arguments of this function should look like:
+
+```python
+from cartesi import abi
+from pydantic import BaseModel
+
+class TransferArgs(BaseModel):
+    to: abi.Address
+    value: abi.UInt256
+```
+
+Note that the attributes of our TransferArgs class is in the same order as the corresponding function.
+
+To generate a voucher, we can create an instance of this class with the desired arguments and pass it to the `create_voucher_from_model` function, as below:
+
+```python
+from cartesi.vouchers import create_voucher_from_model
+
+my_withdrawal = TransferArgs(to=receiver_address, value=value)
+voucher = create_voucher_from_model(
+    destination=erc20_contract_address,
+    function_name='transfer',
+    args_model=my_withdrawal
+)
+```
+
+The value returned by the `create_voucher_from_model` function is a dict in the format expected by the `voucher()` method of the `Rollup` class, which is passed to each handler. See its description above for more information on the format.
+
+A possible pattern that can simplify the development is to declare a function for generating a given voucher. Using the same use case, an example of this pattern would be:
+
+```python
+from cartesi import abi
+from cartesi.vouchers import create_voucher_from_model
+from pydantic import BaseModel
+
+class TransferArgs(BaseModel):
+    to: abi.Address
+    value: abi.UInt256
+
+def transfer_erc20(
+    erc20_address: abi.Address,
+    receiver_address: abi.Address,
+    value=abi.UInt256
+):
+    args = TransferArgs(to=erc20_address, value=value)
+
+    return create_voucher_from_model(
+        destination=erc20_contract_address,
+        function_name='transfer',
+        args_model=args,
+    )
+```
+
+This way, inside your handler you can simply call this `transfer_erc20` function to have the corresponding voucher generated.
+
+The `cartesi.vouchers` module exposes two of such functions:
+
+**`withdraw_ether(receiver, amount)`**
+
+Generate a voucher for transferring Ethers from the contract to the receiver. The parameters are:
+
+- **`receiver`**: Hex encoded address, starting with `0x`, of the receiver of Ethers
+- **`amount`**: Amount of ethers to transfer
+
+**`withdraw_erc20(rollup_address, token, receiver, amount)`**
+
+Generate a voucher for transferring ERC20 tokens owned by the contract to a receiver. The parameters are
+
+- **`rollup_address`**: The hex encoded address, starting with `0x`, of the current DApp. See the `DAppAddressRouter` above for a programmatic way of obtaining this value.
+- **`token`**: The hex encoded address, starting with `0x`, of the ERC20 token contract
+- **`receiver`**: The hex encoded address, starting with `0x`, of the receiver of tokens
+- **`amount`**: Amount of tokens to transfer
