@@ -13,7 +13,7 @@ The main goals of the framework are:
 
 ## Installation
 
-To install the framework you just jave to do a simple:
+To install the framework you just have to do a simple:
 
 ```shell
 pip install python-cartesi
@@ -231,7 +231,7 @@ url_router = URLRouter()
 dapp.add_router(url_router)
 
 @url_router.inspect('hello/{name}')
-def hello_world_inspect_parms(rollup: Rollup, params: URLParameters) -> bool:
+def hello_world_inspect_params(rollup: Rollup, params: URLParameters) -> bool:
     msg = f'Hello {params.path_params["name"]}'
     rollup.report('0x' + msg.encode('utf-8').hex())
     return True
@@ -239,7 +239,7 @@ def hello_world_inspect_parms(rollup: Rollup, params: URLParameters) -> bool:
 
 ### DApp Relay Router
 
-This is a very simple router wihch will receive and accumulate the DApp's contract address, as reported by the DApp address relay contact. The router itself only exposes an attribute called `address`, that will be initialized as None and set to the address reported by the relay contract once it is received.
+This is a very simple router which will receive and accumulate the DApp's contract address, as reported by the DApp address relay contact. The router itself only exposes an attribute called `address`, that will be initialized as None and set to the address reported by the relay contract once it is received.
 
 ```python
 from cartesi import DApp
@@ -324,13 +324,13 @@ Sends an **advance state** input, such as one being received from the underlying
 
 **`TestClient.send_inspect(self, hex_payload)`**
 
-Sends an **inspect** input, such as one being received from the [Inspect dApp state REST API](https://docs.cartesi.io/cartesi-rollups/api/inspect/inspect/). It only expects a hex encoded string, starting with `0x`, with the inpect payload.
+Sends an **inspect** input, such as one being received from the [Inspect dApp state REST API](https://docs.cartesi.io/cartesi-rollups/api/inspect/inspect/). It only expects a hex encoded string, starting with `0x`, with the inspect payload.
 
 For example, if you are running your DApp with sunodo, and want to simulate a the effects of a call to `http://localhost:8000/inspect/hello/world`, the value that should be passed in the hex_payload is `'0x68656c6c6f2f776f726c64'`, which is the hex encoded representation of `hello/world`.
 
 **`TestClient.rollup`**
 
-This is an instance of a test double implementation of the rollup server. This object will contain attributes holding all the notices, reports and vouchers emmitted by the DApp, togethe with the state of the last transaction. The individual attributes are listed below.
+This is an instance of a test double implementation of the rollup server. This object will contain attributes holding all the notices, reports and vouchers emitted by the DApp, together with the state of the last transaction. The individual attributes are listed below.
 
 **`TestClient.rollup.status`**
 
@@ -338,9 +338,9 @@ The boolean status of the latest transaction as returned by the handler. A `True
 
 **`TestClient.rollup.notices`, `TestClient.rollup.reports`, `TestClient.rollup.vouchers`**
 
-A list of dictionaries containing the emmited notices, reports or vouchers. Each dictionary contains the following keys:
+A list of dictionaries containing the emitted notices, reports or vouchers. Each dictionary contains the following keys:
 
-- **`epoch_index`**: The epoch index for the input that generated this emmitted output
+- **`epoch_index`**: The epoch index for the input that generated this emitted output
 - **`input_index`**: The index of the input within the epoch that generated this output
 - **`data`** A dict containing the key `payload`, whose value is the payload for the corresponding output
 
