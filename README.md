@@ -19,7 +19,7 @@ To install the framework you just have to do a simple:
 pip install python-cartesi
 ```
 
-Although this is a pure Python library, it depends on PyCryptodome, which will need to compile some source code. You are advised to either include `build-essential` in the `apt-get install` command of your DApp's Dockerfile or include the line `--find-links https://felipefg.github.io/pip-wheels-riscv/wheels/` in the beginning of your requirements.txt file in order to use a pre-built binary for RiscV.
+Although this is a pure Python library, it depends on PyCryptodome, which will need to compile some source code. You are advised to either include `build-essential` in the `apt-get install` command of your DApp's Dockerfile or include the line `--find-links https://prototyp3-dev.github.io/pip-wheels-riscv/wheels/` in the beginning of your requirements.txt file in order to use a pre-built binary for RiscV.
 
 ## Getting Started
 
