@@ -16,6 +16,9 @@ from . import _eth_abi_packed
 class ABIType:
     name: str
 
+    def __hash__(self):
+        return hash(self.name)
+
 
 UInt = Annotated[int, ABIType('uint')]
 UInt8 = Annotated[int, ABIType('uint8')]
