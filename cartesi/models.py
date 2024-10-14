@@ -20,11 +20,13 @@ def _str2hex(str):
 
 
 class RollupMetadata(BaseModel):
+    chain_id: int
+    app_contract: str
     msg_sender: str
-    epoch_index: int
     input_index: int
     block_number: int
-    timestamp: int
+    block_timestamp: int
+    prev_randao: str
 
 
 class RollupData(BaseModel):

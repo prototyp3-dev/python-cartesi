@@ -18,6 +18,8 @@ class MockRollup(Rollup):
         self.input = 0
         self.block = 0
         self.status = None
+        self.chain_id = 31337
+        self.app_contract = f"{1:#042x}"
 
     def main_loop(self):
         """There is no main loop for test rollup."""
@@ -66,11 +68,13 @@ class MockRollup(Rollup):
             'request_type': 'advance_state',
             'data': {
                 'metadata': {
+                    'chain_id': self.chain_id,
+                    'app_contract': self.app_contract,
                     'msg_sender': msg_sender,
-                    'epoch_index': self.epoch,
                     'input_index': self.input,
                     'block_number': self.block,
-                    'timestamp': timestamp,
+                    'block_timestamp': timestamp,
+                    'prev_randao': f"{self.block:#066x}"
                 },
                 'payload': hex_payload,
             }

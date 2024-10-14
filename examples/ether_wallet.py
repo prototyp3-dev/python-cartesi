@@ -1,18 +1,18 @@
 import logging
 
-from cartesi import DApp
+from cartesi import App
 from cartesi.wallet.ether import EtherWallet
 
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
-dapp = DApp()
+app = App()
 
 
-ETHER_PORTAL_ADDRESS = '0xffdbe43d4c855bf7e0f105c400a50857f53ab044'
+ETHER_PORTAL_ADDRESS = '0x1733b13aAbcEcf3464157Bd7954Bd7e4Cf91Ce22'
 
 ether_wallet = EtherWallet(portal_address=ETHER_PORTAL_ADDRESS)
-dapp.add_router(ether_wallet)
+app.add_router(ether_wallet)
 
 if __name__ == '__main__':
-    dapp.run()
+    app.run()

@@ -1,12 +1,12 @@
 import logging
 
-from cartesi import DApp, Rollup, RollupData, URLRouter, URLParameters
+from cartesi import App, Rollup, RollupData, URLRouter, URLParameters
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
-dapp = DApp()
+app = App()
 url_router = URLRouter()
-dapp.add_router(url_router)
+app.add_router(url_router)
 
 
 def str2hex(str):
@@ -37,4 +37,4 @@ def hello_world_inspect_parms(rollup: Rollup, params: URLParameters) -> bool:
 
 
 if __name__ == '__main__':
-    dapp.run()
+    app.run()

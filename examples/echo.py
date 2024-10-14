@@ -1,10 +1,10 @@
 import logging
 
-from cartesi import DApp, Rollup, RollupData
+from cartesi import App, Rollup, RollupData
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
-dapp = DApp()
+app = App()
 
 
 def str2hex(str):
@@ -12,7 +12,7 @@ def str2hex(str):
     return "0x" + str.encode("utf-8").hex()
 
 
-@dapp.advance()
+@app.advance()
 def handle_advance(rollup: Rollup, data: RollupData) -> bool:
     payload = data.str_payload()
     LOGGER.debug("Echoing '%s'", payload)
@@ -20,7 +20,7 @@ def handle_advance(rollup: Rollup, data: RollupData) -> bool:
     return True
 
 
-@dapp.inspect()
+@app.inspect()
 def handle_inspect(rollup: Rollup, data: RollupData) -> bool:
     payload = data.str_payload()
     LOGGER.debug("Echoing '%s'", payload)
@@ -29,4 +29,4 @@ def handle_inspect(rollup: Rollup, data: RollupData) -> bool:
 
 
 if __name__ == '__main__':
-    dapp.run()
+    app.run()

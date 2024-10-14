@@ -9,7 +9,7 @@ LOGGER = logging.getLogger(__name__)
 ROLLUP_SERVER = os.environ.get('ROLLUP_HTTP_SERVER_URL')
 
 
-class DApp:
+class App:
 
     def __init__(self):
         self.routers: list[Router] = []

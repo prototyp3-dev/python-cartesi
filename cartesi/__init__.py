@@ -1,6 +1,6 @@
 """Framework for building distributed applications for Cartesi Rollups"""
 
-from .dapp import DApp # noqa
+from .app import App # noqa
 from .models import ( # noqa
     ABIFunctionSelectorHeader,
     ABILiteralHeader,

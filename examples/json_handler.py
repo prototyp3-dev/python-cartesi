@@ -1,16 +1,16 @@
 import json
 import logging
 
-from cartesi import DApp, Rollup, RollupData, JSONRouter
+from cartesi import App, Rollup, RollupData, JSONRouter
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-dapp = DApp()
+app = App()
 json_router = JSONRouter()
-dapp.add_router(json_router)
+app.add_router(json_router)
 
-# This dapp will read and write from this global state dict
+# This app will read and write from this global state dict
 STATE = {}
 
 
@@ -63,4 +63,4 @@ def handle_inspect_get(rollup: Rollup, data: RollupData):
 
 
 if __name__ == '__main__':
-    dapp.run()
+    app.run()

@@ -2,13 +2,13 @@
 
 ## Overview
 
-The Cartesi HLF is a framework developing DApps that run inside the [Cartesi](https://cartesi.io/) machine.
+The Cartesi HLF is a framework developing Apps that run inside the [Cartesi](https://cartesi.io/) machine.
 
 The main goals of the framework are:
 
 - **Pythonic**: Offer a idiomatic way of writing the code and specifying the interactions.
 - **Easy to understand**: Inspired on widely used web frameworks, and have a clear to use interface.
-- **Testability**: Have test as a first class citizen, giving the developer tools to write tests for the DApps that run on your local Python environment.
+- **Testability**: Have test as a first class citizen, giving the developer tools to write tests for the Apps that run on your local Python environment.
 - **Flexibility**: You're free to take full control of the inputs and outputs for cases where the given high level tools are not enough.
 
 ## Installation
@@ -19,23 +19,23 @@ To install the framework you just have to do a simple:
 pip install python-cartesi
 ```
 
-Although this is a pure Python library, it depends on PyCryptodome, which will need to compile some source code. You are advised to either include `build-essential` in the `apt-get install` command of your DApp's Dockerfile or include the line `--find-links https://prototyp3-dev.github.io/pip-wheels-riscv/wheels/` in the beginning of your requirements.txt file in order to use a pre-built binary for RiscV.
+Although this is a pure Python library, it depends on PyCryptodome, which will need to compile some source code. You are advised to either include `build-essential` in the `apt-get install` command of your App's Dockerfile or include the line `--find-links https://prototyp3-dev.github.io/pip-wheels-riscv/wheels/` in the beginning of your requirements.txt file in order to use a pre-built binary for RiscV.
 
 ## Getting Started
 
-A very simple DApp that simply echoes in a notice whatever input is sent to it can be seen below:
+A very simple App that simply echoes in a notice whatever input is sent to it can be seen below:
 
 ```python
 import logging
 
-from cartesi import DApp, Rollup, RollupData
+from cartesi import App, Rollup, RollupData
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
-dapp = DApp()
+app = App()
 
 
-@dapp.advance()
+@app.advance()
 def handle_advance(rollup: Rollup, data: RollupData) -> bool:
     payload = data.str_payload()
     LOGGER.debug("Echoing '%s'", payload)
@@ -44,10 +44,10 @@ def handle_advance(rollup: Rollup, data: RollupData) -> bool:
 
 
 if __name__ == '__main__':
-    dapp.run()
+    app.run()
 ```
 
-The handle_advance function will be registered as the DApp's default route of advance state requests by the `dapp.advance()` decorator. The framework also supplies several routers that will offer you convenient ways of handling inputs of commonly used formats. These routers will be discussed in the [Routers](#routers) section.
+The handle_advance function will be registered as the App's default route of advance state requests by the `app.advance()` decorator. The framework also supplies several routers that will offer you convenient ways of handling inputs of commonly used formats. These routers will be discussed in the [Routers](#routers) section.
 
 The handler function also receives two inputs: an instance of a `Rollup` object, that will allow you to interact with the Rollup Server, and an instance of `RollupData`, that contains all the inputs and metadata for the current transaction.
 
@@ -78,21 +78,21 @@ Adds a new [voucher](https://docs.cartesi.io/cartesi-rollups/main-concepts/#vouc
 
 Routers simplify the coding experience by identifying the request type using common patterns in the input data, and calling your handler only when several conditions are met.
 
-Once an input is received by either an advance-state or inspect request, the DApp will go through the list of registered handlers, find the first match and execute it. Each handler should return a boolean indicating whether the transaction was successful or not. If a handler for an advance state request returns false, the state of the DApp will be reverted to what it was before the transaction was received.
+Once an input is received by either an advance-state or inspect request, the App will go through the list of registered handlers, find the first match and execute it. Each handler should return a boolean indicating whether the transaction was successful or not. If a handler for an advance state request returns false, the state of the App will be reverted to what it was before the transaction was received.
 
-To use a router, it must be explicitly instantiated and added to the DApp. For example, to use a JSON Router, you should adapt your DApp code to include the `add_router()` call, like the snippet below:
+To use a router, it must be explicitly instantiated and added to the App. For example, to use a JSON Router, you should adapt your App code to include the `add_router()` call, like the snippet below:
 
 ```python
-from cartesi import DApp, JSONRouter
+from cartesi import App, JSONRouter
 
-# Create a DApp instance
-dapp = DApp()
+# Create a App instance
+app = App()
 
 # Instantiate the JSON Router
 json_router = JSONRouter()
 
-# Register the JSON Router into the DApp
-dapp.add_router(json_router)
+# Register the JSON Router into the App
+app.add_router(json_router)
 ```
 
 ### JSON Router
@@ -107,11 +107,11 @@ The JSON Router expose two decorators methods: `advance(route_dict)` and `inspec
 For example, a route that handles the creation of a profile could be coded as below:
 
 ```python
-from cartesi import DApp, Rollup, RollupData, JSONRouter
+from cartesi import App, Rollup, RollupData, JSONRouter
 
-dapp = DApp()
+app = App()
 json_router = JSONRouter()
-dapp.add_router(json_router)
+app.add_router(json_router)
 
 @json_router.advance({"op": "create-profile"})
 def handle_create_profile(rollup: Rollup, data: RollupData):
@@ -121,10 +121,10 @@ def handle_create_profile(rollup: Rollup, data: RollupData):
     return True
 
 if __name__ == '__main__':
-    dapp.run()
+    app.run()
 ```
 
-For this DApp, if the data incoming from the Cartesi input is the equivalent to the JSON `{"op": "create-profile", "name": "John Doe"}`, router will match due to the presence of the `"op":"create-profile"` key-value pair, and the handler should generate a report containing the string "John Doe".
+For this App, if the data incoming from the Cartesi input is the equivalent to the JSON `{"op": "create-profile", "name": "John Doe"}`, router will match due to the presence of the `"op":"create-profile"` key-value pair, and the handler should generate a report containing the string "John Doe".
 
 ### ABI Router
 
@@ -142,11 +142,11 @@ To match with headers, you should pass an instance of a subclass of `ABIHeader` 
 Matches with a literal header supplied by the developer in the `header` attribute, as bytes. For example, the following handler matches with inputs starting with the bytes `0x01020304`:
 
 ```python
-from cartesi import DApp, Rollup, RollupData, ABIRouter, ABILiteralHeader
+from cartesi import App, Rollup, RollupData, ABIRouter, ABILiteralHeader
 
-dapp = DApp()
+app = App()
 abi_router = ABIRouter()
-dapp.add_router(abi_router)
+app.add_router(abi_router)
 
 @abi_router.advance(header=ABILiteralHeader(header=bytes.fromhex('01020304')))
 def handle_input_1234(rollup: Rollup, data: RollupData):
@@ -187,11 +187,11 @@ class MyCustomHeader(ABIHeader):
 The `msg_sender` parameter for the advance decorator method of the `ABIRouter` will match not with the contents but with the sender of the message. For example, to match with the Cartesi's Ether Portal, you can declare a route like the code below:
 
 ```python
-from cartesi import DApp, Rollup, RollupData, ABIRouter, ABILiteralHeader
+from cartesi import App, Rollup, RollupData, ABIRouter, ABILiteralHeader
 
-dapp = DApp()
+app = App()
 abi_router = ABIRouter()
-dapp.add_router(abi_router)
+app.add_router(abi_router)
 
 ETHER_PORTAL = '0xffdbe43d4c855bf7e0f105c400a50857f53ab044'
 
@@ -200,7 +200,7 @@ def handle_deposit(rollup: Rollup, data: RollupData):
     ...
 ```
 
-In this example, the `handle_deposit` function will be called whenever the Ether portal sends an input to the DApp.
+In this example, the `handle_deposit` function will be called whenever the Ether portal sends an input to the App.
 
 Both the `msg_sender` and `header` parameters can be set at the same time. In this case, the message must match with both criteria to trigger the execution of the handler.
 
@@ -221,14 +221,14 @@ The handler can receive a third argument of the `URLParameter` type. This object
 > [!IMPORTANT]
 > It is mandatory to correctly annotate the handler's parameters with type hints. The URLHandler will use this information to dynamically determine what information to send to the handler.
 
-The code fragment for the DApp below, for example, will return a report containing the string 'Hello World' when the user send an input `hello/world`. When running with sunodo, this can be achieved by sending an HTTP GET request to `http://localhost:8000/inspect/hello/world`.
+The code fragment for the App below, for example, will return a report containing the string 'Hello World' when the user send an input `hello/world`. When running with sunodo, this can be achieved by sending an HTTP GET request to `http://localhost:8000/inspect/hello/world`.
 
 ```python
-from cartesi import DApp, Rollup, URLRouter, URLParameters
+from cartesi import App, Rollup, URLRouter, URLParameters
 
-dapp = DApp()
+app = App()
 url_router = URLRouter()
-dapp.add_router(url_router)
+app.add_router(url_router)
 
 @url_router.inspect('hello/{name}')
 def hello_world_inspect_params(rollup: Rollup, params: URLParameters) -> bool:
@@ -237,34 +237,18 @@ def hello_world_inspect_params(rollup: Rollup, params: URLParameters) -> bool:
     return True
 ```
 
-### DApp Relay Router
+### The App default Router
 
-This is a very simple router which will receive and accumulate the DApp's contract address, as reported by the DApp address relay contact. The router itself only exposes an attribute called `address`, that will be initialized as None and set to the address reported by the relay contract once it is received.
+The App object itself exposes two decorators: `advance()` and `inspect()`. The handled decorated with these methods will be called if none of the available routes match. They act, therefore, as a default handler for each type of request. This can be used to both create more specific error handlers for your application, or to handle specific cases not covered by a generic router.
 
-```python
-from cartesi import DApp
-from cartesi.router import DAppAddressRouter
-
-ADDRESS_RELAY_ADDRESS = '0xf5de34d6bbc0446e2a45719e718efebaae179dae'
-
-dapp = DApp()
-
-dapp_address = DAppAddressRouter(relay_address=ADDRESS_RELAY_ADDRESS)
-dapp.add_router(dapp_address)
-```
-
-### The DApp default Router
-
-The DApp object itself exposes two decorators: `advance()` and `inspect()`. The handled decorated with these methods will be called if none of the available routes match. They act, therefore, as a default handler for each type of request. This can be used to both create more specific error handlers for your application, or to handle specific cases not covered by a generic router.
-
-For example, given the following DApp:
+For example, given the following App:
 
 ```python
-from cartesi import DApp, Rollup, RollupData, JSONRouter
+from cartesi import App, Rollup, RollupData, JSONRouter
 
-dapp = DApp()
+app = App()
 json_router = JSONRouter()
-dapp.add_router(json_router)
+app.add_router(json_router)
 
 @json_router.advance({"op": "create-profile"})
 def handle_create_profile(rollup: Rollup, data: RollupData):
@@ -273,22 +257,22 @@ def handle_create_profile(rollup: Rollup, data: RollupData):
     rollup.report('0x' + name.encode('utf-8').hex())
     return True
 
-@dapp.advance()
+@app.advance()
 def default_handler(rollup: Rollup, data: RollupData):
     rollup.report('0x' + 'Unknown Operation'.encode('utf-8').hex())
     return True
 
 if __name__ == '__main__':
-    dapp.run()
+    app.run()
 ```
 
 If the user passes an invalid JSON or a document that does not contain the `"op":"create-profile"` key-value pair, the `handle_create_profile` route will not match and the framework will call the `default_handler` function with the input.
 
 ## Testing
 
-Testing is an important part of the development of complex software. The framework provides a TestClient that can be used to interact a DApp inside automated tests. The constructor of the `TestClient` class expects a fully configured instance of the `DApp` class, and expose methods for sending advance and inspect requests.
+Testing is an important part of the development of complex software. The framework provides a TestClient that can be used to interact a App inside automated tests. The constructor of the `TestClient` class expects a fully configured instance of the `App` class, and expose methods for sending advance and inspect requests.
 
-For example, supposing we have an `echo.py` file with an implementation of an echo DApp, we could write the following file for automated tests using pytest:
+For example, supposing we have an `echo.py` file with an implementation of an echo App, we could write the following file for automated tests using pytest:
 
 ```python
 from cartesi.testclient import TestClient
@@ -297,18 +281,18 @@ import pytest
 import echo
 
 @pytest.fixture
-def dapp_client() -> TestClient:
-    client = TestClient(echo.dapp)
+def app_client() -> TestClient:
+    client = TestClient(echo.app)
     return client
 
-def test_simple_echo(dapp_client: TestClient):
+def test_simple_echo(app_client: TestClient):
     hex_payload = '0x' + 'hello'.encode('utf-8').hex()
 
-    dapp_client.send_advance(hex_payload=hex_payload)
+    app_client.send_advance(hex_payload=hex_payload)
 
-    assert dapp_client.rollup.status
-    assert len(dapp_client.rollup.notices) > 0
-    assert dapp_client.rollup.notices[-1]['data']['payload'] == hex_payload
+    assert app_client.rollup.status
+    assert len(app_client.rollup.notices) > 0
+    assert app_client.rollup.notices[-1]['data']['payload'] == hex_payload
 ```
 
 Although the example above was written using pytest, the TestClient makes no assumption about the testing framework, so it should work equally well using the python's builtin unittest module or other automated test frameworks.
@@ -326,11 +310,11 @@ Sends an **advance state** input, such as one being received from the underlying
 
 Sends an **inspect** input, such as one being received from the [Inspect dApp state REST API](https://docs.cartesi.io/cartesi-rollups/api/inspect/inspect/). It only expects a hex encoded string, starting with `0x`, with the inspect payload.
 
-For example, if you are running your DApp with sunodo, and want to simulate a the effects of a call to `http://localhost:8000/inspect/hello/world`, the value that should be passed in the hex_payload is `'0x68656c6c6f2f776f726c64'`, which is the hex encoded representation of `hello/world`.
+For example, if you are running your App with sunodo, and want to simulate a the effects of a call to `http://localhost:8000/inspect/hello/world`, the value that should be passed in the hex_payload is `'0x68656c6c6f2f776f726c64'`, which is the hex encoded representation of `hello/world`.
 
 **`TestClient.rollup`**
 
-This is an instance of a test double implementation of the rollup server. This object will contain attributes holding all the notices, reports and vouchers emitted by the DApp, together with the state of the last transaction. The individual attributes are listed below.
+This is an instance of a test double implementation of the rollup server. This object will contain attributes holding all the notices, reports and vouchers emitted by the App, together with the state of the last transaction. The individual attributes are listed below.
 
 **`TestClient.rollup.status`**
 
@@ -348,7 +332,7 @@ For notices and reports, the payload will be a hex encoded string, starting with
 
 ## Generating Vouchers
 
-A voucher is an output that your DApp can generate to perform a transaction in the base layer blockchain. Once emitted, and finalized, the voucher can be retrieved by an external agent through the GraphQL API and then submitted to the DApp on-chain contract so that the desired transaction take place. Since it represents a full transaction, the voucher payload should be a full function call encoded according to the Solidity [Contract ABI Specification](https://docs.soliditylang.org/en/latest/abi-spec.html).
+A voucher is an output that your App can generate to perform a transaction in the base layer blockchain. Once emitted, and finalized, the voucher can be retrieved by an external agent through the GraphQL API and then submitted to the App on-chain contract so that the desired transaction take place. Since it represents a full transaction, the voucher payload should be a full function call encoded according to the Solidity [Contract ABI Specification](https://docs.soliditylang.org/en/latest/abi-spec.html).
 
 This framework offers a pythonic way for representing the function calls and generating the voucher payload. The high level way of generating a voucher involves creating a [Pydantic](https://docs.pydantic.dev/1.10/) model with specially annotated type hints that will allow the encoder to understand which Solidity type should be used when encoding the values.
 
@@ -380,7 +364,8 @@ my_withdrawal = TransferArgs(to=receiver_address, value=value)
 voucher = create_voucher_from_model(
     destination=erc20_contract_address,
     function_name='transfer',
-    args_model=my_withdrawal
+    args_model=my_withdrawal,
+    value=0
 )
 ```
 
@@ -422,11 +407,11 @@ Generate a voucher for transferring Ethers from the contract to the receiver. Th
 - **`receiver`**: Hex encoded address, starting with `0x`, of the receiver of Ethers
 - **`amount`**: Amount of ethers to transfer
 
-**`withdraw_erc20(rollup_address, token, receiver, amount)`**
+**`withdraw_erc20(app_contract, token, receiver, amount)`**
 
 Generate a voucher for transferring ERC20 tokens owned by the contract to a receiver. The parameters are
 
-- **`rollup_address`**: The hex encoded address, starting with `0x`, of the current DApp. See the `DAppAddressRouter` above for a programmatic way of obtaining this value.
+- **`app_contract`**: The hex encoded address, starting with `0x`, of the current App. All inputs inform this address  the `app_contract` above for a programmatic way of obtaining this value.
 - **`token`**: The hex encoded address, starting with `0x`, of the ERC20 token contract
 - **`receiver`**: The hex encoded address, starting with `0x`, of the receiver of tokens
 - **`amount`**: Amount of tokens to transfer

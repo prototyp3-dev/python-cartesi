@@ -27,13 +27,16 @@ class Rollup(ABC):
         pass
 
     @abstractmethod
-    def notice(self, payload) -> str:
+    def notice(self, payload: str) -> str:
         pass
 
     @abstractmethod
-    def report(self, payload) -> str:
+    def report(self, payload: str) -> str:
         pass
 
+    @abstractmethod
+    def voucher(self, payload: dict) -> str:
+        pass
 
 class HTTPRollupServer(Rollup):
     """HTTP Communication with Rollup Server based on Requests"""

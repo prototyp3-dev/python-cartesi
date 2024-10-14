@@ -6,7 +6,8 @@ from pydantic import BaseModel
 from .. import abi
 from ..models import RollupData, ABIFunctionSelectorHeader
 from ..rollup import Rollup
-from ..router import MultiRouter, ABIRouter, URLRouter, DAppAddressRouter
+from ..router import MultiRouter, ABIRouter, URLRouter
+from ..vouchers import create_voucher_from_model
 
 
 LOGGER = logging.getLogger(__name__)
@@ -35,13 +36,11 @@ class EtherWallet(MultiRouter):
     def __init__(
         self,
         portal_address: str,
-        dapp_address_router: DAppAddressRouter,
         default_withdraw_route: bool = True,
     ):
         super().__init__()
         self.balance: dict[str, int] = {}
         self.portal_address = portal_address
-        self.dapp_address_router = dapp_address_router
 
         self.on_deposit = None
 
@@ -129,5 +128,11 @@ def _withdraw_ether(
     wallet.balance[address] -= withdrawal.amount
 
     # Generate Voucher
+    rollup.voucher(
+        create_voucher_from_model(
+            destination=address,
+            value=withdrawal.amount
+        )
+    )
 
     return True

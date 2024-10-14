@@ -9,8 +9,8 @@ import examples.ether_wallet
 
 
 @pytest.fixture
-def dapp_client() -> TestClient:
-    client = TestClient(examples.ether_wallet.dapp)
+def app_client() -> TestClient:
+    client = TestClient(examples.ether_wallet.app)
     return client
 
 
@@ -26,24 +26,24 @@ def deposit_payload() -> str:
     return payload
 
 
-def test_should_handle_deposit(dapp_client: TestClient, deposit_payload: str):
+def test_should_handle_deposit(app_client: TestClient, deposit_payload: str):
     # Send the Deposit
-    dapp_client.send_advance(
+    app_client.send_advance(
         hex_payload=deposit_payload,
         msg_sender=examples.ether_wallet.ETHER_PORTAL_ADDRESS,
     )
 
     # Deposit should succeed
-    assert dapp_client.rollup.status
+    assert app_client.rollup.status
 
     # Send the inspect
     path = 'balance/ether'
     inspect_payload = '0x' + path.encode('ascii').hex()
-    dapp_client.send_inspect(hex_payload=inspect_payload)
+    app_client.send_inspect(hex_payload=inspect_payload)
 
-    assert dapp_client.rollup.status
+    assert app_client.rollup.status
 
-    report = dapp_client.rollup.reports[-1]['data']['payload']
+    report = app_client.rollup.reports[-1]['data']['payload']
     report = bytes.fromhex(report[2:])
     report = json.loads(report.decode('utf-8'))
     print(json.dumps(report, indent=4))
