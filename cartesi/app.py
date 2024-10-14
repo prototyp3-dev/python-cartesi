@@ -1,12 +1,12 @@
-import os
-import logging
+from os import environ
+from logging import getLogger, debug
 
 from .models import RollupResponse
 from .rollup import Rollup, HTTPRollupServer
 from .router import Router
 
-LOGGER = logging.getLogger(__name__)
-ROLLUP_SERVER = os.environ.get('ROLLUP_HTTP_SERVER_URL')
+LOGGER = getLogger(__name__)
+ROLLUP_SERVER = environ.get('ROLLUP_HTTP_SERVER_URL')
 
 
 class App:
@@ -59,7 +59,7 @@ class App:
         if handler is None:
             handler = self._get_default_handler(request)
 
-        logging.debug("Handler: %s", repr(handler))
+        debug("Handler: %s", repr(handler))
         try:
             status = handler(self.rollup, request.data)
         except Exception:

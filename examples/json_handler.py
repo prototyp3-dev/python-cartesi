@@ -1,10 +1,10 @@
-import json
-import logging
+from json import dumps
+from logging import getLogger, basicConfig, DEBUG
 
 from cartesi import App, Rollup, RollupData, JSONRouter
 
-LOGGER = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+LOGGER = getLogger(__name__)
+basicConfig(level=DEBUG)
 
 app = App()
 json_router = JSONRouter()
@@ -21,7 +21,7 @@ def str2hex(str):
 
 def to_jsonhex(data):
     """Encode as a JSON hex"""
-    return str2hex(json.dumps(data))
+    return str2hex(dumps(data))
 
 
 @json_router.advance({"op": "set"})

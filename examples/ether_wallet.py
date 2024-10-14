@@ -1,11 +1,11 @@
-import logging
+from logging import getLogger, basicConfig, DEBUG
 
 from cartesi import App
 from cartesi.wallet.ether import EtherWallet
 
 
-LOGGER = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+LOGGER = getLogger(__name__)
+basicConfig(level=DEBUG)
 app = App()
 
 

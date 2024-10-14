@@ -1,9 +1,9 @@
 from collections.abc import Callable
-import inspect
+from inspect import getfullargspec
 from itertools import chain
-import logging
-import re
-import typing
+from logging import getLogger
+from re import Pattern, compile, escape
+from typing import Pattern as typing_Pattern
 from urllib.parse import parse_qs
 
 from pydantic import BaseModel
@@ -12,7 +12,7 @@ from .base import Router
 from ..models import RollupResponse, RollupData
 from ..rollup import Rollup
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = getLogger(__name__)
 
 
 class URLParameters(BaseModel):
@@ -22,7 +22,7 @@ class URLParameters(BaseModel):
 
 class URLOperation(BaseModel):
     path: str
-    path_regex: re.Pattern
+    path_regex: Pattern
     handler: Callable
     operationId: str
     requestType: str
@@ -141,7 +141,7 @@ def _create_handler(route_handler, url_params: URLParameters):
     Return a handler with the default router arguments, but applies additional
     args to the user's function according to introspection
     """
-    args = inspect.getfullargspec(route_handler)
+    args = getfullargspec(route_handler)
 
     def _handler(rollup: Rollup, data: RollupData):
         kwargs = {}
@@ -181,10 +181,10 @@ def _match_url(pattern, request_path: str):
     return (True, params)
 
 
-PARAM_REGEX = re.compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
+PARAM_REGEX = compile("{([a-zA-Z_][a-zA-Z0-9_]*)}")
 
 
-def compile_path(path: str) -> typing.Pattern:
+def compile_path(path: str) -> typing_Pattern:
     """
     Given a path string like "/{operation}", returns a corresponding regex.
 
@@ -195,10 +195,10 @@ def compile_path(path: str) -> typing.Pattern:
     for match in PARAM_REGEX.finditer(path):
         param_name = match.groups()[0]
 
-        path_regex += re.escape(path[idx: match.start()])
+        path_regex += escape(path[idx: match.start()])
         path_regex += f"(?P<{param_name}>[^/]+)"
 
         idx = match.end()
 
     path_regex += path[idx:] + "$"
-    return re.compile(path_regex)
+    return compile(path_regex)

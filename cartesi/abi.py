@@ -4,9 +4,9 @@ ABI Types and Helpers for Router and Codecs
 from typing import Annotated, get_type_hints, TypeVar
 from dataclasses import dataclass
 
-import eth_abi
-import eth_abi.packed
-import pydantic
+from eth_abi_lite import decode_abi, encode_abi
+import eth_abi_lite.packed
+from pydantic import BaseModel
 
 from . import _eth_abi_packed
 
@@ -66,7 +66,7 @@ def _get_abi_for_type(field_type):
     """
 
 
-def get_abi_types_from_model(model: pydantic.BaseModel) -> list[str]:
+def get_abi_types_from_model(model: BaseModel) -> list[str]:
     """Return a list of types representing the Pydantic Model
 
     Parameters
@@ -107,7 +107,7 @@ def get_abi_types_from_model(model: pydantic.BaseModel) -> list[str]:
     return types
 
 
-def encode_model(obj: pydantic.BaseModel, packed: bool = False) -> bytes:
+def encode_model(obj: BaseModel, packed: bool = False) -> bytes:
     """Serialize the model using ABI encoding.
 
     Parameters
@@ -124,18 +124,18 @@ def encode_model(obj: pydantic.BaseModel, packed: bool = False) -> bytes:
         Serialized version of the model
     """
     if packed:
-        encode = eth_abi.packed.encode_packed
+        encode_fn = eth_abi_lite.packed.encode_packed
     else:
-        encode = eth_abi.encode
+        encode_fn = encode_abi
 
     fields = obj.__fields__.keys()
     data = [getattr(obj, x) for x in fields]
     types = get_abi_types_from_model(obj)
 
-    return encode(types, data)
+    return encode_fn(types, data)
 
 
-M = TypeVar('M', bound=pydantic.BaseModel)
+M = TypeVar('M', bound=BaseModel)
 
 
 def decode_to_model(data: bytes, model: M, packed: bool = False) -> M:
@@ -156,13 +156,13 @@ def decode_to_model(data: bytes, model: M, packed: bool = False) -> M:
         Object containing decoded data
     """
     if packed:
-        decode = _eth_abi_packed.decode_packed
+        decode_fn = eth_abi_lite.packed.decode_packed
     else:
-        decode = eth_abi.decode
+        decode_fn = decode_abi
 
     fields = model.__fields__.keys()
     types = get_abi_types_from_model(model)
-    decoded = decode(types, data)
+    decoded = decode_fn(types, data)
 
     kwargs = dict(zip(fields, decoded))
     return model.parse_obj(kwargs)

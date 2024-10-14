@@ -1,11 +1,11 @@
-from eth_abi.codec import (
+from eth_abi_lite.codec import (
     ABICodec,
 )
-from eth_abi.registry import (
+from eth_abi_lite.registry import (
     registry_packed,
     BaseEquals
 )
-from eth_abi.decoding import (
+from eth_abi_lite.decoding import (
     BooleanDecoder,
     AddressDecoder,
     UnsignedIntegerDecoder,
@@ -64,4 +64,4 @@ registry_packed.register_decoder(
 
 default_codec_packed = ABICodec(registry_packed)
 
-decode_packed = default_codec_packed.decode
+decode_packed = default_codec_packed.decode_abi

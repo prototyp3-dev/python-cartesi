@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-import os
-import logging
+from os import environ
+from logging import getLogger
 
-import requests
+from requests import post
 
 from .models import RollupResponse
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = getLogger(__name__)
 
 DEFAULT_ROLLUP_URL = 'http://127.0.0.1:5004'
 
@@ -44,7 +44,7 @@ class HTTPRollupServer(Rollup):
     def __init__(self, address: str = None):
         super().__init__()
         if address is None:
-            address = os.environ.get(
+            address = environ.get(
                 'ROLLUP_HTTP_SERVER_URL',
                 DEFAULT_ROLLUP_URL
             )
@@ -56,7 +56,7 @@ class HTTPRollupServer(Rollup):
         while True:
 
             LOGGER.info("Sending finish")
-            response = requests.post(self.address + "/finish", json=finish)
+            response = post(self.address + "/finish", json=finish)
 
             LOGGER.info(f"Received finish status {response.status_code}")
             if response.status_code == 202:
@@ -80,7 +80,7 @@ class HTTPRollupServer(Rollup):
         data = {
             'payload': payload
         }
-        response = requests.post(self.address + "/notice", json=data)
+        response = post(self.address + "/notice", json=data)
         LOGGER.info(f"Received notice status {response.status_code} "
                     f"body {response.content}")
         return response.content
@@ -90,14 +90,14 @@ class HTTPRollupServer(Rollup):
         data = {
             'payload': payload
         }
-        response = requests.post(self.address + "/report", json=data)
+        response = post(self.address + "/report", json=data)
         LOGGER.info(f"Received report status {response.status_code} "
                     f"body {response.content}")
         return response.content
 
     def voucher(self, payload: dict):
         LOGGER.info("Adding voucher")
-        response = requests.post(self.address + '/voucher', json=payload)
+        response = post(self.address + '/voucher', json=payload)
         LOGGER.info(f"Received report status {response.status_code} "
                     f"body {response.content}")
         return response.content
