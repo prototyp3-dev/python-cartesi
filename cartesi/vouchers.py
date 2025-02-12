@@ -50,7 +50,7 @@ def create_voucher_from_model(
 
     voucher = {
         'destination': destination,
-        'value': f"{value:#066}x",
+        'value': f"{value:#066x}",
         'payload': '0x' + selector + args
     }
     return voucher

@@ -8,7 +8,7 @@ from eth_abi_lite import decode_abi, encode_abi
 import eth_abi_lite.packed
 from pydantic import BaseModel
 
-from . import _eth_abi_packed
+from cartesi._eth_abi_packed import decode_abi_packed
 
 
 # Type Aliases for ABI encoding
@@ -124,7 +124,7 @@ def encode_model(obj: BaseModel, packed: bool = False) -> bytes:
         Serialized version of the model
     """
     if packed:
-        encode_fn = eth_abi_lite.packed.encode_packed
+        encode_fn = eth_abi_lite.packed.encode_abi_packed
     else:
         encode_fn = encode_abi
 
@@ -156,7 +156,7 @@ def decode_to_model(data: bytes, model: M, packed: bool = False) -> M:
         Object containing decoded data
     """
     if packed:
-        decode_fn = eth_abi_lite.packed.decode_packed
+        decode_fn = decode_abi_packed
     else:
         decode_fn = decode_abi
 

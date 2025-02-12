@@ -17,7 +17,6 @@ def app_client() -> TestClient:
 @pytest.fixture
 def deposit_payload() -> str:
     deposit = DepositEtherPayload(
-        success=True,
         sender="0x721be000f6054b5e0e57aaab791015b53f0a18f4",
         depositAmount=int(1e18),
         execLayerData=b'',

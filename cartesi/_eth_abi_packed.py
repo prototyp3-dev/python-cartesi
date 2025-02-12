@@ -64,4 +64,4 @@ registry_packed.register_decoder(
 
 default_codec_packed = ABICodec(registry_packed)
 
-decode_packed = default_codec_packed.decode_abi
+decode_abi_packed = default_codec_packed.decode_abi

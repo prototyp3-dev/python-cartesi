@@ -14,7 +14,6 @@ class MockRollup(Rollup):
         self.notices = []
         self.reports = []
         self.vouchers = []
-        self.epoch = 0
         self.input = 0
         self.block = 0
         self.status = None
@@ -27,7 +26,6 @@ class MockRollup(Rollup):
 
     def notice(self, payload: str):
         data = {
-            'epoch_index': self.epoch,
             'input_index': self.input,
             'data': {
                 'payload': payload,
@@ -37,7 +35,6 @@ class MockRollup(Rollup):
 
     def report(self, payload: str):
         data = {
-            'epoch_index': self.epoch,
             'input_index': self.input,
             'data': {
                 'payload': payload,
@@ -45,12 +42,23 @@ class MockRollup(Rollup):
         }
         self.reports.append(data)
 
-    def voucher(self, payload: str):
+    def voucher(self, payload: dict):
         data = {
-            'epoch_index': self.epoch,
             'input_index': self.input,
             'data': {
-                'payload': payload,
+                'destination': payload.get('destination'),
+                'value': payload.get('value'),
+                'payload': payload.get('payload'),
+            }
+        }
+        self.vouchers.append(data)
+
+    def delegate_call_voucher(self, payload: dict):
+        data = {
+            'input_index': self.input,
+            'data': {
+                'destination': payload.get('destination'),
+                'payload': payload.get('payload'),
             }
         }
         self.vouchers.append(data)
@@ -91,9 +99,6 @@ class MockRollup(Rollup):
             self.input += 1
 
     def send_inspect(self, hex_payload: str):
-
-        self.block += 1
-
         data = {
             'request_type': 'inspect_state',
             'data': {
@@ -108,9 +113,6 @@ class MockRollup(Rollup):
             LOGGER.error("No handler found for message.")
             status = False
         self.status = status
-        if status:
-            self.input += 1
-
 
 class TestClient:
     __test__ = False

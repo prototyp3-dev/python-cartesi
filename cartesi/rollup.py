@@ -27,15 +27,19 @@ class Rollup(ABC):
         pass
 
     @abstractmethod
-    def notice(self, payload: str) -> str:
+    def notice(self, payload: str) -> bytes | None:
         pass
 
     @abstractmethod
-    def report(self, payload: str) -> str:
+    def report(self, payload: str) -> bytes | None:
         pass
 
     @abstractmethod
-    def voucher(self, payload: dict) -> str:
+    def voucher(self, payload: dict) -> bytes | None:
+        pass
+
+    @abstractmethod
+    def delegate_call_voucher(self, payload: dict) -> bytes | None:
         pass
 
 class HTTPRollupServer(Rollup):
@@ -98,6 +102,13 @@ class HTTPRollupServer(Rollup):
     def voucher(self, payload: dict):
         LOGGER.info("Adding voucher")
         response = post(self.address + '/voucher', json=payload)
-        LOGGER.info(f"Received report status {response.status_code} "
+        LOGGER.info(f"Received voucher status {response.status_code} "
+                    f"body {response.content}")
+        return response.content
+
+    def delegate_call_voucher(self, payload: dict):
+        LOGGER.info("Adding voucher")
+        response = post(self.address + '/delegate-call-voucher', json=payload)
+        LOGGER.info(f"Received delegate call voucher status {response.status_code} "
                     f"body {response.content}")
         return response.content
