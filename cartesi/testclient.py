@@ -14,6 +14,8 @@ class MockRollup(Rollup):
         self.notices = []
         self.reports = []
         self.vouchers = []
+        self.delegate_call_vouchers = []
+        self.gios = []
         self.input = 0
         self.block = 0
         self.status = None
@@ -61,7 +63,7 @@ class MockRollup(Rollup):
                 'payload': payload.get('payload'),
             }
         }
-        self.vouchers.append(data)
+        self.delegate_call_vouchers.append(data)
 
     def send_advance(
             self,

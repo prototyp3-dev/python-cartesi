@@ -107,7 +107,7 @@ class HTTPRollupServer(Rollup):
         return response.content
 
     def delegate_call_voucher(self, payload: dict):
-        LOGGER.info("Adding voucher")
+        LOGGER.info("Adding delegate call voucher")
         response = post(self.address + '/delegate-call-voucher', json=payload)
         LOGGER.info(f"Received delegate call voucher status {response.status_code} "
                     f"body {response.content}")
