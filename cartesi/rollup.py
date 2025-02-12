@@ -42,6 +42,10 @@ class Rollup(ABC):
     def delegate_call_voucher(self, payload: dict) -> bytes | None:
         pass
 
+    @abstractmethod
+    def gio(self, payload: dict) -> bytes | None:
+        pass
+
 class HTTPRollupServer(Rollup):
     """HTTP Communication with Rollup Server based on Requests"""
 
@@ -110,5 +114,12 @@ class HTTPRollupServer(Rollup):
         LOGGER.info("Adding delegate call voucher")
         response = post(self.address + '/delegate-call-voucher', json=payload)
         LOGGER.info(f"Received delegate call voucher status {response.status_code} "
+                    f"body {response.content}")
+        return response.content
+
+    def gio(self, payload: dict):
+        LOGGER.info("Adding gio")
+        response = post(self.address + '/gio', json=payload)
+        LOGGER.info(f"Received gio status {response.status_code} "
                     f"body {response.content}")
         return response.content
