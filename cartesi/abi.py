@@ -124,7 +124,7 @@ def get_abi_types_from_model(model: pydantic.BaseModel) -> list[str]:
                 nested_types = get_abi_types_from_model(nested_type)
                 types.append(f'({",".join(nested_types)})[]')
             else:
-                types.append(_get_abi_for_type(field, nested_type))
+                types.append(_get_abi_for_type(field, nested_type) + '[]')
 
             continue
 
