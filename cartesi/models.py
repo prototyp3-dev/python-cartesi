@@ -21,10 +21,10 @@ def _str2hex(str):
 
 class RollupMetadata(BaseModel):
     msg_sender: str
-    epoch_index: int
+    epoch_index: int = -1
     input_index: int
     block_number: int
-    timestamp: int
+    timestamp: int = 0
 
 
 class RollupData(BaseModel):
