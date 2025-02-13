@@ -5,7 +5,8 @@ from logging import getLogger
 
 from requests import post
 
-from .models import RollupResponse
+from .models import RollupResponse, EvmAdvance, evm_advance_header
+from .abi import decode_to_model
 
 LOGGER = getLogger(__name__)
 
@@ -49,7 +50,7 @@ class Rollup(ABC):
 class HTTPRollupServer(Rollup):
     """HTTP Communication with Rollup Server based on Requests"""
 
-    def __init__(self, address: str = None):
+    def __init__(self, address: str = None, raw_input: bool = False):
         super().__init__()
         if address is None:
             address = environ.get(
@@ -57,6 +58,7 @@ class HTTPRollupServer(Rollup):
                 DEFAULT_ROLLUP_URL
             )
         self.address = address
+        self.raw_input = raw_input
 
     def main_loop(self):
 
@@ -72,7 +74,24 @@ class HTTPRollupServer(Rollup):
                 continue
 
             rollup_response = response.json()
+            if self.raw_input:
+                if rollup_response.get('data') is not None and \
+                        rollup_response['data'].get('payload') is not None and \
+                        rollup_response['data']['payload'][2:10] == evm_advance_header.to_bytes().hex():
+                    advance_data = decode_to_model(data=bytes.fromhex(rollup_response['data']['payload'][10:]),model=EvmAdvance)
+                    if rollup_response['data'].get('metadata') is not None:
+                        rollup_response['data']['metadata'] = {
+                            'chain_id': advance_data.chain_id,
+                            'app_contract': advance_data.app_contract,
+                            'msg_sender': advance_data.msg_sender,
+                            'block_number': advance_data.block_number,
+                            'block_timestamp': advance_data.block_timestamp,
+                            'prev_randao': advance_data.prev_randao,
+                            'input_index': advance_data.input_index
+                        }
+                        rollup_response['data']['payload'] = f"0x{advance_data.payload.hex()}"
             # TODO: Error handling for this model creation
+            LOGGER.debug(f"Finish response body {rollup_response}")
             rollup_response = RollupResponse.parse_obj(rollup_response)
 
             handler = self.handler
