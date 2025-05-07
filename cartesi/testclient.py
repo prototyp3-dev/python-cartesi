@@ -49,7 +49,7 @@ class MockRollup(Rollup):
             'input_index': self.input,
             'data': {
                 'destination': payload.get('destination'),
-                'value': payload.get('value'),
+                'value': int(payload.get('value') or "0x0",0),
                 'payload': payload.get('payload'),
             }
         }

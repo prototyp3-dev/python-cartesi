@@ -25,8 +25,8 @@ def to_jsonhex(data):
 
 
 @json_router.advance({"op": "set"})
-def handle_advance_set(rollup: Rollup, data: RollupData):
-    data = data.json_payload()
+def handle_advance_set(rollup: Rollup, raw_data: RollupData):
+    data = raw_data.json_payload()
     key = data['key']
     value = data['value']
 

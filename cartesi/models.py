@@ -40,7 +40,7 @@ class RollupData(BaseModel):
     def str_payload(self, encoding='utf-8') -> str:
         return bytes.fromhex(self.payload[2:]).decode(encoding)
 
-    def json_payload(self) -> bytes:
+    def json_payload(self) -> dict:
         return json.loads(self.str_payload())
 
 
@@ -52,7 +52,7 @@ class RollupResponse(BaseModel):
 class ABIHeader(BaseModel, abc.ABC):
 
     @abc.abstractmethod
-    def to_bytes(self):
+    def to_bytes(self) -> bytes:
         """Get the bytes representation for this header"""
         pass
 
