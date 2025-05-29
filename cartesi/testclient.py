@@ -49,7 +49,7 @@ class MockRollup(Rollup):
             'input_index': self.input,
             'data': {
                 'destination': payload.get('destination'),
-                'value': payload.get('value'),
+                'value': int(payload.get('value') or "0x0",0),
                 'payload': payload.get('payload'),
             }
         }
@@ -64,6 +64,16 @@ class MockRollup(Rollup):
             }
         }
         self.delegate_call_vouchers.append(data)
+
+    def gio(self, payload: dict):
+        data = {
+            'input_index': self.input,
+            'data': {
+                'domain': payload.get('domain'),
+                'id': payload.get('id'),
+            }
+        }
+        self.gios.append(data)
 
     def send_advance(
             self,
