@@ -74,6 +74,93 @@ Adds a new [voucher](https://docs.cartesi.io/cartesi-rollups/main-concepts/#vouc
 - **destination**: The address of the destination contract as a string, starting with the `'0x'` prefix.
 - **payload**: The payload for the transaction in Ethereum hex binary format. The contents of this field will be the transaction's data field.
 
+## Using the `Output` classes directly
+
+In addition to calling `rollup.notice()`, `rollup.report()`, and `rollup.voucher()` inside your handler, the Cartesi High-Level Framework also supports an object-oriented approach using specialized classes: `Notice`, `Report`, and `Voucher`. These classes implement a shared `Output` interface and offer more flexible and modular ways to emit outputs.
+
+Each of these classes can be used in multiple ways and support different helpers for common use cases:
+
+### Notice
+
+You can instantiate a notice directly using a hex-encoded string or use helper methods to generate one from a string or a JSON object.
+
+```python
+Notice("0x68656c6c6f20776f726c64").create()
+Notice.from_hex("0x68656c6c6f20776f726c64").create()
+Notice.from_string("hello world").create()
+Notice.from_json({"foo": "bar"}).create()
+```
+
+### Report
+
+Similar to notices, reports can also be created directly or from strings and JSON:
+
+```python
+Report("0x68656c6c6f20776f726c64").create()
+Report.from_hex("0x68656c6c6f20776f726c64").create()
+Report.from_string("This is a log message").create()
+Report.from_json({"event": "user_login", "user": "Alice"}).create()
+```
+
+### Voucher
+
+Vouchers represent actual transactions on the base layer. You can generate them from:
+
+* Hex strings of function selector + encoded payload
+* Function selectors with ABI types and values
+
+```python
+# From raw hex
+Voucher.from_hex("0xRecipientAddress", "0xpayload").create()
+
+# From function selector
+Voucher.from_function_selector(
+    destination="0xRecipientAddress",
+    selector="mint(address,string,uint256,uint256)",
+    types=["address", "string", "uint256", "uint256"],
+    values=[data["metadata"]["msg_sender"], "text_value", 100, 2000]
+).create()
+```
+
+### Example usage in an advance handler
+
+```python
+@dapp.advance()
+def handle_advance(rollup: Rollup, data: RollupData) -> bool:
+    payload = data.str_payload()
+
+    # Still using the Rollup object
+    rollup.notice("0x" + payload.encode('utf-8').hex())
+
+    # Also using the object-oriented style
+    Report.from_string("Received: " + payload).create()
+    Notice.from_json({"echoed": payload}).create()
+
+    Voucher.from_function_selector(
+        destination="0x7b693356646348D27A745bFb3E3f9CC82B893a6c",
+        selector="registerPublicKey",
+        types=["bytes"],
+        values=[bytes.fromhex("ba57...")]
+    ).create()
+
+    return True
+```
+
+This approach improves modularity, decouples your logic from the Rollup object, and can help with mocking or extending output behavior for testing or advanced scenarios.
+
+### Overriding the Rollup Server address
+
+By default, the `create()` method of `Notice`, `Report`, and `Voucher` will send the output to the Rollup Server address defined in the environment variable `ROLLUP_HTTP_SERVER_URL`. If that environment variable is not set, it falls back to `http://127.0.0.1:5004`.
+
+However, if you want to explicitly specify a different Rollup Server address—such as in testing environments or custom setups—you can override it by passing the `rollup_server_address` argument to the `create()` method:
+
+```python
+custom_address = "http://localhost:7000"
+
+# Notice with overridden address
+Notice.from_string("hello world").create(rollup_server_address=custom_address)
+```
+
 ## Routers
 
 Routers simplify the coding experience by identifying the request type using common patterns in the input data, and calling your handler only when several conditions are met.
