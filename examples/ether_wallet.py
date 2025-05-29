@@ -9,7 +9,7 @@ basicConfig(level=DEBUG)
 app = App()
 
 
-ETHER_PORTAL_ADDRESS = '0xfa2292f6D85ea4e629B156A4f99219e30D12EE17'
+ETHER_PORTAL_ADDRESS = '0xC700e916E5c4DE0C41F410Fb05ab5337DcD20051'
 
 ether_wallet = EtherWallet(portal_address=ETHER_PORTAL_ADDRESS)
 app.add_router(ether_wallet)
