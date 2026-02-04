@@ -17,6 +17,7 @@ class App:
         self.default_inspect_handler = lambda rollup, data: False
         self.rollup: Rollup | None = None
         self.raw_input = raw_input
+        self.use_cmpy = use_cmpy
 
     def advance(self):
         """Decorator for inserting handle advance"""
@@ -75,8 +76,8 @@ class App:
     def run(self):
         if self.rollup is None:
             if self.use_cmpy:
-                from .cmpy_rollup import CmpyRollupApp
-                self.rollup = CmpyRollupApp(raw_input=self.raw_input)
+                from .pycmt_rollup import CmtRollupApp
+                self.rollup = CmtRollupApp()
             else:
                 from .rollup import HTTPRollupServer
                 self.rollup = HTTPRollupServer(raw_input=self.raw_input)
