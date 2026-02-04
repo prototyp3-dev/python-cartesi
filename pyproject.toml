@@ -20,6 +20,11 @@ dependencies = [
     "pycryptodome ~= 3.19.0",
 ]
 
+[project.optional-dependencies]
+machine = [
+    "pycmt >= 0.0.1",
+]
+
 [project.urls]
 "Homepage" = "https://github.com/prototyp3-dev/python-cartesi"
 
