@@ -1,6 +1,6 @@
 [project]
 name = "python-cartesi"
-version = "0.2.0"
+version = "0.2.1"
 authors = [
   { name="Felipe Fink Grael", email="felipefg@prototyp3.dev" },{ name="Lyno Ferraz", email="lyno@prototyp3.dev" }
 ]
