@@ -32,27 +32,30 @@ class CmtRollupApp(Rollup):
         while True:
             LOGGER.info("Sending finish")
             next_request_type = self._rollup.finish(accept_previous_request)
-
-            rollup_response = {}
+            rollup_response = {
+                'request_type': None,
+                'data': {},
+            }
+            LOGGER.debug(f"Received {next_request_type} input")
             if next_request_type == 'advance':
                 advance = self._rollup.read_advance_state()
-                rollup_response = {
-                    'metadata': {
-                        'chain_id': advance['chain_id'],
-                        'app_contract': "0x" + advance['app_contract'].hex(),
-                        'msg_sender': "0x" + advance['msg_sender'].hex(),
-                        'input_index': advance['input_index'],
-                        'block_number': advance['block_number'],
-                        'block_timestamp': advance['block_timestamp'],
-                        'prev_randao': "0x" + advance['prev_randao'].hex()
-                    },
-                    'payload': "0x" + advance['payload']['data'].hex()
+                rollup_response['data']['metadata'] = {
+                    'chain_id': advance['chain_id'],
+                    'app_contract': "0x" + advance['app_contract'].hex(),
+                    'msg_sender': "0x" + advance['msg_sender'].hex(),
+                    'input_index': advance['index'],
+                    'block_number': advance['block_number'],
+                    'block_timestamp': advance['block_timestamp'],
+                    'prev_randao': "0x" + advance['prev_randao'].hex()
                 }
+                LOGGER.debug(f"Advance state {rollup_response}")
+                rollup_response['data']['payload'] = "0x" + advance['payload']['data'].hex()
+                rollup_response['request_type'] = 'advance_state'
             elif next_request_type == 'inspect':
                 inspect = self._rollup.read_inspect_state()
-                rollup_response = {
-                    'payload': "0x" + inspect['payload']['data'].hex()
-                }
+                rollup_response['data']['payload'] = "0x" + inspect['payload']['data'].hex()
+                rollup_response['request_type'] = 'inspect_state'
+                LOGGER.debug(f"Inspect state {rollup_response}")
             else:
                 LOGGER.error("Invalid request type.")
                 accept_previous_request = False
@@ -87,10 +90,12 @@ class CmtRollupApp(Rollup):
 
     def delegate_call_voucher(self, payload: dict):
         LOGGER.info("Adding delegate call voucher")
-        payload_bytes = to_bytes(payload)
+        payload_bytes = to_bytes(payload['payload'])
         self._rollup.emit_delegate_call_voucher(payload['destination'], payload_bytes)
         return b''
 
     def gio(self, payload: dict):
-        LOGGER.error("Gio not supported")
-        return b''
+        LOGGER.info("Adding gio request")
+        payload_bytes = to_bytes(payload['payload'])
+        ret = self._rollup.gio_request(payload['domain'], payload_bytes)
+        return bytes(ret['response_data'][:len(ret['response_data'])])

@@ -34,9 +34,11 @@ class App:
         """Decorator for inserting handle advance"""
 
         def decorator(func):
+            LOGGER.debug("Adding func %s to inspect_handler", repr(func))
             self.default_inspect_handler = func
             return func
 
+        LOGGER.debug('Returning an Inspect Decorator')
         return decorator
 
     def _get_default_handler(self, request: RollupResponse):
