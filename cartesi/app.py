@@ -2,7 +2,7 @@ from os import environ
 from logging import getLogger, debug
 
 from .models import RollupResponse
-from .rollup import Rollup, HTTPRollupServer
+from .rollup import Rollup
 from .router import Router
 
 LOGGER = getLogger(__name__)
@@ -11,12 +11,13 @@ ROLLUP_SERVER = environ.get('ROLLUP_HTTP_SERVER_URL')
 
 class App:
 
-    def __init__(self, raw_input = False):
+    def __init__(self, raw_input = False, use_pycmt = False):
         self.routers: list[Router] = []
         self.default_advance_handler = lambda rollup, data: False
         self.default_inspect_handler = lambda rollup, data: False
         self.rollup: Rollup | None = None
         self.raw_input = raw_input
+        self.use_pycmt = use_pycmt
 
     def advance(self):
         """Decorator for inserting handle advance"""
@@ -33,9 +34,11 @@ class App:
         """Decorator for inserting handle advance"""
 
         def decorator(func):
+            LOGGER.debug("Adding func %s to inspect_handler", repr(func))
             self.default_inspect_handler = func
             return func
 
+        LOGGER.debug('Returning an Inspect Decorator')
         return decorator
 
     def _get_default_handler(self, request: RollupResponse):
@@ -74,6 +77,11 @@ class App:
 
     def run(self):
         if self.rollup is None:
-            self.rollup = HTTPRollupServer(raw_input=self.raw_input)
+            if self.use_pycmt:
+                from .pycmt_rollup import CmtRollupApp
+                self.rollup = CmtRollupApp()
+            else:
+                from .rollup import HTTPRollupServer
+                self.rollup = HTTPRollupServer(raw_input=self.raw_input)
         self.rollup.set_handler(self._handle)
         self.rollup.main_loop()
