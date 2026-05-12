@@ -1,6 +1,6 @@
 [project]
 name = "python-cartesi"
-version = "0.2.1"
+version = "0.2.2"
 authors = [
   { name="Felipe Fink Grael", email="felipefg@prototyp3.dev" },{ name="Lyno Ferraz", email="lyno@prototyp3.dev" }
 ]
@@ -24,6 +24,11 @@ dependencies = [
 machine = [
     "pycmt >= 0.0.1",
 ]
+machine-asset = [
+    "pycmt >= 0.0.1",
+    "pycma >= 0.0.1",
+]
+
 
 [project.urls]
 "Homepage" = "https://github.com/prototyp3-dev/python-cartesi"

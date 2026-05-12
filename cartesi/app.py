@@ -11,13 +11,14 @@ ROLLUP_SERVER = environ.get('ROLLUP_HTTP_SERVER_URL')
 
 class App:
 
-    def __init__(self, raw_input = False, use_pycmt = False):
+    def __init__(self, raw_input = False, use_pycmt = False, use_pycma = False):
         self.routers: list[Router] = []
         self.default_advance_handler = lambda rollup, data: False
         self.default_inspect_handler = lambda rollup, data: False
         self.rollup: Rollup | None = None
         self.raw_input = raw_input
         self.use_pycmt = use_pycmt
+        self.use_pycma = use_pycma
 
     def advance(self):
         """Decorator for inserting handle advance"""
@@ -80,6 +81,9 @@ class App:
             if self.use_pycmt:
                 from .pycmt_rollup import CmtRollupApp
                 self.rollup = CmtRollupApp()
+            elif self.use_pycma:
+                from .pycma_rollup import CmaRollupApp
+                self.rollup = CmaRollupApp()
             else:
                 from .rollup import HTTPRollupServer
                 self.rollup = HTTPRollupServer(raw_input=self.raw_input)

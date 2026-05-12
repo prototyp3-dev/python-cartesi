@@ -1,5 +1,5 @@
 from logging import getLogger
-from pycmt import Rollup as CmtRollup
+from pycma import RollupCma
 import re
 
 from .rollup import Rollup
@@ -18,13 +18,13 @@ def to_bytes(payload):
         return payload.encode('utf-8')
     return bytes(payload)
 
-class CmtRollupApp(Rollup):
-    """Libcmt Rollup based"""
-    _rollup: CmtRollup
+class CmaRollupApp(Rollup):
+    """Libcma and Libcmt Rollup based"""
+    _rollup: RollupCma
 
     def __init__(self):
         super().__init__()
-        self._rollup = CmtRollup()
+        self._rollup = RollupCma()
 
     def main_loop(self):
         accept_previous_request = True
