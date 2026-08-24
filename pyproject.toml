@@ -22,7 +22,7 @@ dependencies = [
 
 [project.optional-dependencies]
 machine = [
-    "pycmt >= 0.0.1",
+    "pycmt >= 0.0.2",
 ]
 machine-asset = [
     "pycmt >= 0.0.2",
