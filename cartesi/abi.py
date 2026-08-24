@@ -5,11 +5,11 @@ from inspect import isclass
 from typing import Annotated, get_type_hints, TypeVar, get_args, get_origin
 from dataclasses import dataclass
 
-import eth_abi
-import eth_abi.packed
+from eth_abi_lite import decode_abi, encode_abi
+import eth_abi_lite.packed
 import pydantic
 
-from . import _eth_abi_packed
+from cartesi._eth_abi_packed import decode_abi_packed
 
 
 # Type Aliases for ABI encoding
@@ -199,14 +199,14 @@ def encode_model(obj: pydantic.BaseModel, packed: bool = False) -> bytes:
         Serialized version of the model
     """
     if packed:
-        encode = eth_abi.packed.encode_packed
+        encode_fn = eth_abi_lite.packed.encode_abi_packed
     else:
-        encode = eth_abi.encode
+        encode_fn = encode_abi
 
     data = _get_values_from_model(obj)
     types = get_abi_types_from_model(obj)
 
-    return encode(types, data)
+    return encode_fn(types, data)
 
 
 M = TypeVar('M', bound=pydantic.BaseModel)
@@ -282,11 +282,11 @@ def decode_to_model(data: bytes, model: M, packed: bool = False) -> M:
         Object containing decoded data
     """
     if packed:
-        decode = _eth_abi_packed.decode_packed
+        decode_fn = decode_abi_packed
     else:
-        decode = eth_abi.decode
+        decode_fn = decode_abi
 
     types = get_abi_types_from_model(model)
-    decoded = decode(types, data)
+    decoded = decode_fn(types, data)
 
     return _parse_to_model(model, decoded)

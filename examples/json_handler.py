@@ -1,16 +1,16 @@
-import json
-import logging
+from json import dumps
+from logging import getLogger, basicConfig, DEBUG
 
-from cartesi import DApp, Rollup, RollupData, JSONRouter
+from cartesi import App, Rollup, RollupData, JSONRouter
 
-LOGGER = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+LOGGER = getLogger(__name__)
+basicConfig(level=DEBUG)
 
-dapp = DApp()
+app = App()
 json_router = JSONRouter()
-dapp.add_router(json_router)
+app.add_router(json_router)
 
-# This dapp will read and write from this global state dict
+# This app will read and write from this global state dict
 STATE = {}
 
 
@@ -21,12 +21,12 @@ def str2hex(str):
 
 def to_jsonhex(data):
     """Encode as a JSON hex"""
-    return str2hex(json.dumps(data))
+    return str2hex(dumps(data))
 
 
 @json_router.advance({"op": "set"})
-def handle_advance_set(rollup: Rollup, data: RollupData):
-    data = data.json_payload()
+def handle_advance_set(rollup: Rollup, raw_data: RollupData):
+    data = raw_data.json_payload()
     key = data['key']
     value = data['value']
 
@@ -63,4 +63,4 @@ def handle_inspect_get(rollup: Rollup, data: RollupData):
 
 
 if __name__ == '__main__':
-    dapp.run()
+    app.run()

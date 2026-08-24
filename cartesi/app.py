@@ -1,21 +1,24 @@
-import os
-import logging
+from os import environ
+from logging import getLogger, debug
 
 from .models import RollupResponse
-from .rollup import Rollup, HTTPRollupServer
+from .rollup import Rollup
 from .router import Router
 
-LOGGER = logging.getLogger(__name__)
-ROLLUP_SERVER = os.environ.get('ROLLUP_HTTP_SERVER_URL')
+LOGGER = getLogger(__name__)
+ROLLUP_SERVER = environ.get('ROLLUP_HTTP_SERVER_URL')
 
 
-class DApp:
+class App:
 
-    def __init__(self):
+    def __init__(self, raw_input = False, use_pycmt = False, use_pycma = False):
         self.routers: list[Router] = []
         self.default_advance_handler = lambda rollup, data: False
         self.default_inspect_handler = lambda rollup, data: False
         self.rollup: Rollup | None = None
+        self.raw_input = raw_input
+        self.use_pycmt = use_pycmt
+        self.use_pycma = use_pycma
 
     def advance(self):
         """Decorator for inserting handle advance"""
@@ -32,9 +35,11 @@ class DApp:
         """Decorator for inserting handle advance"""
 
         def decorator(func):
+            LOGGER.debug("Adding func %s to inspect_handler", repr(func))
             self.default_inspect_handler = func
             return func
 
+        LOGGER.debug('Returning an Inspect Decorator')
         return decorator
 
     def _get_default_handler(self, request: RollupResponse):
@@ -59,7 +64,7 @@ class DApp:
         if handler is None:
             handler = self._get_default_handler(request)
 
-        logging.debug("Handler: %s", repr(handler))
+        debug("Handler: %s", repr(handler))
         try:
             status = handler(self.rollup, request.data)
         except Exception:
@@ -73,6 +78,14 @@ class DApp:
 
     def run(self):
         if self.rollup is None:
-            self.rollup = HTTPRollupServer()
+            if self.use_pycmt:
+                from .pycmt_rollup import CmtRollupApp
+                self.rollup = CmtRollupApp()
+            elif self.use_pycma:
+                from .pycma_rollup import CmaRollupApp
+                self.rollup = CmaRollupApp()
+            else:
+                from .rollup import HTTPRollupServer
+                self.rollup = HTTPRollupServer(raw_input=self.raw_input)
         self.rollup.set_handler(self._handle)
         self.rollup.main_loop()

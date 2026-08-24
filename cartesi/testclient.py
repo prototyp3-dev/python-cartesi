@@ -14,10 +14,13 @@ class MockRollup(Rollup):
         self.notices = []
         self.reports = []
         self.vouchers = []
-        self.epoch = 0
+        self.delegate_call_vouchers = []
+        self.gios = []
         self.input = 0
         self.block = 0
         self.status = None
+        self.chain_id = 31337
+        self.app_contract = f"{1:#042x}"
 
     def main_loop(self):
         """There is no main loop for test rollup."""
@@ -25,7 +28,6 @@ class MockRollup(Rollup):
 
     def notice(self, payload: str):
         data = {
-            'epoch_index': self.epoch,
             'input_index': self.input,
             'data': {
                 'payload': payload,
@@ -35,7 +37,6 @@ class MockRollup(Rollup):
 
     def report(self, payload: str):
         data = {
-            'epoch_index': self.epoch,
             'input_index': self.input,
             'data': {
                 'payload': payload,
@@ -43,15 +44,36 @@ class MockRollup(Rollup):
         }
         self.reports.append(data)
 
-    def voucher(self, payload: str):
+    def voucher(self, payload: dict):
         data = {
-            'epoch_index': self.epoch,
             'input_index': self.input,
             'data': {
-                'payload': payload,
+                'destination': payload.get('destination'),
+                'value': int(payload.get('value') or "0x0",0),
+                'payload': payload.get('payload'),
             }
         }
         self.vouchers.append(data)
+
+    def delegate_call_voucher(self, payload: dict):
+        data = {
+            'input_index': self.input,
+            'data': {
+                'destination': payload.get('destination'),
+                'payload': payload.get('payload'),
+            }
+        }
+        self.delegate_call_vouchers.append(data)
+
+    def gio(self, payload: dict):
+        data = {
+            'input_index': self.input,
+            'data': {
+                'domain': payload.get('domain'),
+                'id': payload.get('id'),
+            }
+        }
+        self.gios.append(data)
 
     def send_advance(
             self,
@@ -66,11 +88,13 @@ class MockRollup(Rollup):
             'request_type': 'advance_state',
             'data': {
                 'metadata': {
+                    'chain_id': self.chain_id,
+                    'app_contract': self.app_contract,
                     'msg_sender': msg_sender,
-                    'epoch_index': self.epoch,
                     'input_index': self.input,
                     'block_number': self.block,
-                    'timestamp': timestamp,
+                    'block_timestamp': timestamp,
+                    'prev_randao': f"{self.block:#066x}"
                 },
                 'payload': hex_payload,
             }
@@ -87,9 +111,6 @@ class MockRollup(Rollup):
             self.input += 1
 
     def send_inspect(self, hex_payload: str):
-
-        self.block += 1
-
         data = {
             'request_type': 'inspect_state',
             'data': {
@@ -104,9 +125,6 @@ class MockRollup(Rollup):
             LOGGER.error("No handler found for message.")
             status = False
         self.status = status
-        if status:
-            self.input += 1
-
 
 class TestClient:
     __test__ = False

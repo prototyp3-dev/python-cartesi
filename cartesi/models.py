@@ -3,6 +3,7 @@ import json
 
 from Crypto.Hash import keccak
 from pydantic import BaseModel
+from .abi import UInt256, Bytes, Address, get_abi_types_from_model
 
 
 def _hex2str(hex):
@@ -20,11 +21,13 @@ def _str2hex(str):
 
 
 class RollupMetadata(BaseModel):
+    chain_id: int
+    app_contract: str
     msg_sender: str
-    epoch_index: int
     input_index: int
     block_number: int
-    timestamp: int
+    block_timestamp: int
+    prev_randao: str
 
 
 class RollupData(BaseModel):
@@ -37,7 +40,7 @@ class RollupData(BaseModel):
     def str_payload(self, encoding='utf-8') -> str:
         return bytes.fromhex(self.payload[2:]).decode(encoding)
 
-    def json_payload(self) -> bytes:
+    def json_payload(self) -> dict:
         return json.loads(self.str_payload())
 
 
@@ -49,7 +52,7 @@ class RollupResponse(BaseModel):
 class ABIHeader(BaseModel, abc.ABC):
 
     @abc.abstractmethod
-    def to_bytes(self):
+    def to_bytes(self) -> bytes:
         """Get the bytes representation for this header"""
         pass
 
@@ -74,3 +77,18 @@ class ABIFunctionSelectorHeader(ABIHeader):
 
         selector = sig_hash.digest()[:4]
         return selector
+
+class EvmAdvance(BaseModel):
+    chain_id:           UInt256
+    app_contract:       Address
+    msg_sender:         Address
+    block_number:       UInt256
+    block_timestamp:    UInt256
+    prev_randao:        UInt256
+    input_index:        UInt256
+    payload:            Bytes
+
+evm_advance_header = ABIFunctionSelectorHeader(
+    function=EvmAdvance.__name__,
+    argument_types=get_abi_types_from_model(EvmAdvance)
+)
